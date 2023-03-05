@@ -1,4 +1,10 @@
+"""
+Provides a task data model. A task has a name, estimates and an optional
+task group identifier.
+"""
+
 import math
+from typing import Optional
 
 
 class Task:
@@ -10,7 +16,7 @@ class Task:
         optimistic: float,  # Optimistic estimate in person days
         pessimistic: float,  # Pessimistic estimate in person days
         likely: float,  # Most likely estimate in person days
-        group: Optional[str] = None,
+        group: Optional[str] = None,  # pylint: disable=R0913
     ):
         """
         Initialize a task whith a name, estimates and an optional task group
