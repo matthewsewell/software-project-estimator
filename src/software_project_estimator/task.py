@@ -4,7 +4,6 @@ task group identifier.
 """
 
 import math
-from typing import Optional
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
