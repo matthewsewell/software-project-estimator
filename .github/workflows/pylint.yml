@@ -1,6 +1,8 @@
 name: Pylint
 
-on: [push]
+on:
+  merge:
+    branches: [ "main" ]
 
 jobs:
   build:
