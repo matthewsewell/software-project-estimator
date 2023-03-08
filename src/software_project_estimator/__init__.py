@@ -1,4 +1,5 @@
 """
 Provides module-level constants and functions for the software_project_estimator package.
 """
-from .task import Task
+from .project import Project
+from .task import Task, TaskGroup
