@@ -64,5 +64,25 @@ class Project(BaseModel):
 
     @property
     def work_week_hours(self) -> float:
-        """Return the number of work hours per week."""
+        """The number of work hours per week."""
         return self.work_days_per_week * self.work_hours_per_day
+
+    @property
+    def num_communication_channels(self) -> int:
+        """The number of communication channels."""
+        return int(self.developer_count * (self.developer_count - 1) / 2)
+
+    @property
+    def max_person_days_per_week(self) -> float:
+        """
+        The maximum number of person days per week, taking into account the loss
+        of productivity due to communication.
+        """
+        base_hours = self.developer_count * self.work_week_hours
+        communication_hours = (
+            # Each communication channel has two people
+            2
+            * self.num_communication_channels
+            * self.communication_penalty
+        )
+        return (base_hours - communication_hours) / self.work_hours_per_day
