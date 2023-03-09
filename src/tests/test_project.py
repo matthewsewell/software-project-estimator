@@ -94,3 +94,16 @@ class TestProject(unittest.TestCase):
         # lose a total of 3 hours this week due to communication overhead. That
         # gives them collectively 117 hours per week to work. That is 14.625 days
         self.assertEqual(project.max_person_days_per_week, 14.625)
+
+    def test_is_christmas_a_holiday(self):
+        """Test the is_holiday method with some cheer."""
+        project = Project(name="Test")
+        self.assertTrue(project.is_holiday(date(2023, 12, 25)))
+        self.assertFalse(project.is_holiday(date(2023, 12, 26)))
+
+    def test_person_days_lost_to_holidays_this_week(self):
+        """Test the person_days_lost_to_holidays_this_week method."""
+        project = Project(name="Test", developer_count=5)
+        self.assertEqual(
+            project.person_days_lost_to_holidays_this_week(date(2023, 12, 22)), 5
+        )
