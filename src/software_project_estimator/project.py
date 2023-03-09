@@ -4,9 +4,10 @@ can be set and a number of properties that can be read. Additionally, it can run
 the Monte Carlo simulation and return the results.
 """
 
-from datetime import date
+from datetime import date, timedelta
 from typing import List
 
+import holidays
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
 from software_project_estimator.task import Task, TaskGroup
@@ -61,6 +62,7 @@ class Project(BaseModel):
     )
     distribution: dict = {}
     endings: dict = {}
+    _work_holidays: dict = {}
 
     @property
     def work_week_hours(self) -> float:
@@ -86,3 +88,22 @@ class Project(BaseModel):
             * self.communication_penalty
         )
         return (base_hours - communication_hours) / self.work_hours_per_day
+
+    def is_holiday(self, this_date: date) -> bool:
+        """Returns True if this_date is a holiday."""
+        try:
+            holidays_this_year = self._work_holidays[this_date.year]
+        except KeyError:
+            holidays_this_year = holidays.UnitedStates(years=[this_date.year])
+            self._work_holidays[this_date.year] = holidays_this_year
+        return this_date in holidays_this_year
+
+    def person_days_lost_to_holidays_this_week(self, start_date: date) -> int:
+        """Returns the number of person days lost to holidays this week."""
+        days_lost = 0
+        current_date = start_date
+        for _day in range(DAYS_IN_A_WEEK):
+            if self.is_holiday(current_date):
+                days_lost += self.developer_count
+            current_date += timedelta(days=1)
+        return days_lost
