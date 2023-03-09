@@ -99,9 +99,7 @@ class Project(BaseModel):
         return this_date in holidays_this_year
 
     def person_days_lost_to_holidays_this_week(self, start_date: date) -> int:
-        """
-        Returns the number of person days lost to holidays this week.
-        """
+        """Returns the number of person days lost to holidays this week."""
         days_lost = 0
         current_date = start_date
         for _day in range(DAYS_IN_A_WEEK):
