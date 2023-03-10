@@ -55,7 +55,7 @@ class TestTaskGroup(unittest.TestCase):
         with self.assertRaises(ValueError):
             TaskGroup()
 
-    def add_task_list(self):
+    def test_add_task_list(self):
         """Test the adding a list of tasks."""
         task_group = TaskGroup(name="Test")
         task_list = []
@@ -91,3 +91,11 @@ class TestTaskGroup(unittest.TestCase):
         added_again = task_group.add_task(task)
         self.assertFalse(added_again)
         self.assertEqual(task_group.tasks, [task])
+
+    def test_task_count(self):
+        """Test the task_count property."""
+        task_group = TaskGroup(name="Test")
+        self.assertEqual(task_group.task_count, 0)
+        task = Task(name="Test", optimistic=1, pessimistic=2, likely=3)
+        task_group.add_task(task)
+        self.assertEqual(task_group.task_count, 1)
