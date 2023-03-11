@@ -2,7 +2,7 @@
 import unittest
 from datetime import date
 
-from software_project_estimator.project import DAYS_IN_A_WEEK, Project, WEEKS_IN_A_YEAR
+from software_project_estimator.project import WEEKS_IN_A_YEAR, Project
 
 
 class TestProject(unittest.TestCase):
@@ -114,8 +114,22 @@ class TestProject(unittest.TestCase):
         this test is probabilistic and may fail occasionally.
         """
         project = Project(name="Test", developer_count=1)
+
         project.weeks_off_per_year = 1
         total_days = 0
         for _index in range(WEEKS_IN_A_YEAR):
             total_days += project.random_weekly_person_days_lost_to_vacations()
         self.assertTrue(0 <= total_days <= 20)
+
+        project.weeks_off_per_year = 0
+        total_days = 0
+        for _index in range(WEEKS_IN_A_YEAR):
+            total_days += project.random_weekly_person_days_lost_to_vacations()
+        self.assertTrue(0 <= total_days <= 20)
+
+        # Ensure that test covereage is 100%.
+        project.weeks_off_per_year = 26
+        total_days = 0
+        for _index in range(WEEKS_IN_A_YEAR):
+            total_days += project.random_weekly_person_days_lost_to_vacations()
+        self.assertTrue(total_days > 0)

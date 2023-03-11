@@ -7,9 +7,8 @@ the Monte Carlo simulation and return the results.
 from datetime import date, timedelta
 from typing import List
 
-import numpy
-
 import holidays
+import numpy
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
 from software_project_estimator.task import Task, TaskGroup
@@ -117,7 +116,7 @@ class Project(BaseModel):
         """
         if self.weeks_off_per_year <= 0:
             return 0
-        days = 0
+        days = 0.0
         for _index in range(self.developer_count):
             maximum = WEEKS_IN_A_YEAR / self.weeks_off_per_year
             if numpy.random.uniform(0.0, maximum) <= 1.0:
