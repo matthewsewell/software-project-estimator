@@ -125,7 +125,7 @@ class TestProject(unittest.TestCase):
         total_days = 0
         for _index in range(WEEKS_IN_A_YEAR):
             total_days += project.random_weekly_person_days_lost_to_vacations()
-        self.assertTrue(0 <= total_days <= 20)
+        self.assertEqual(total_days, 0)
 
         # Ensure that test covereage is 100%.
         project.weeks_off_per_year = 26
