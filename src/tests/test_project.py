@@ -2,7 +2,7 @@
 import unittest
 from datetime import date
 
-from software_project_estimator.project import Project
+from software_project_estimator.project import DAYS_IN_A_WEEK, Project, WEEKS_IN_A_YEAR
 
 
 class TestProject(unittest.TestCase):
@@ -107,3 +107,15 @@ class TestProject(unittest.TestCase):
         self.assertEqual(
             project.person_days_lost_to_holidays_this_week(date(2023, 12, 22)), 5
         )
+
+    def test_random_weekly_person_days_lost_to_vacations(self):
+        """
+        Test the random_weekly_person_days_lost_to_vacations method. Warning:
+        this test is probabilistic and may fail occasionally.
+        """
+        project = Project(name="Test", developer_count=1)
+        project.weeks_off_per_year = 1
+        total_days = 0
+        for _index in range(WEEKS_IN_A_YEAR):
+            total_days += project.random_weekly_person_days_lost_to_vacations()
+        self.assertTrue(0 <= total_days <= 20)

@@ -7,12 +7,14 @@ the Monte Carlo simulation and return the results.
 from datetime import date, timedelta
 from typing import List
 
+import numpy
+
 import holidays
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
 from software_project_estimator.task import Task, TaskGroup
 
-DAYS_IN_A_WEEK = 5
+DAYS_IN_A_WEEK = 7
 WEEKS_IN_A_YEAR = 52
 
 
@@ -107,3 +109,17 @@ class Project(BaseModel):
                 days_lost += self.developer_count
             current_date += timedelta(days=1)
         return days_lost
+
+    def random_weekly_person_days_lost_to_vacations(self) -> int:
+        """
+        Returns a random number of person days theoretically lost to vacations
+        within an imagiary week
+        """
+        if self.weeks_off_per_year <= 0:
+            return 0
+        days = 0
+        for _index in range(self.developer_count):
+            maximum = WEEKS_IN_A_YEAR / self.weeks_off_per_year
+            if numpy.random.uniform(0.0, maximum) <= 1.0:
+                days += self.work_days_per_week
+        return int(days)
