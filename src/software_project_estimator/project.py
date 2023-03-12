@@ -112,7 +112,7 @@ class Project(BaseModel):
     def random_weekly_person_days_lost_to_vacations(self) -> int:
         """
         Returns a random number of person days theoretically lost to vacations
-        within an imagiary week
+        within an imagiary week.
         """
         if self.weeks_off_per_year <= 0:
             return 0
@@ -122,3 +122,19 @@ class Project(BaseModel):
             if numpy.random.uniform(0.0, maximum) <= 1.0:
                 days += self.work_days_per_week
         return int(days)
+
+    def random_estimated_project_person_days(self) -> float:
+        """
+        Returns a semi-random number of estimated project person days. This is
+        based on the probability distribution of the project's tasks and is
+        useful in aggregating the results of multiple simulations.
+        """
+        days = 0.0
+        for task_group in self.task_groups:
+            for task in task_group.tasks:
+                days += numpy.random.normal(task.average, task.stddev)
+
+        for task in self.tasks:
+            days += numpy.random.normal(task.average, task.stddev)
+
+        return days
