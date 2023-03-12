@@ -39,6 +39,11 @@ class TestProject(unittest.TestCase):
         project = Project(name="Test")
         self.assertEqual(project.work_days_per_week, 5.0)
 
+    def test_default_weekly_work_days(self):
+        """Test the default weekly_work_days property."""
+        project = Project(name="Test")
+        self.assertEqual(project.weekly_work_days, [0,1,2,3,4, ])
+
     def test_default_work_hours_per_day(self):
         """Test that the default work hours per day is 8."""
         project = Project(name="Test")
