@@ -10,11 +10,11 @@ class TestTask(unittest.TestCase):
 
     def test_task(self):
         """Test the Task class happy path."""
-        task = Task(name="Test", optimistic=1, pessimistic=2, likely=3)
+        task = Task(name="Test", optimistic=1, pessimistic=3, likely=2)
         self.assertEqual(task.name, "Test")
         self.assertEqual(task.optimistic, 1)
-        self.assertEqual(task.pessimistic, 2)
-        self.assertEqual(task.likely, 3)
+        self.assertEqual(task.pessimistic, 3)
+        self.assertEqual(task.likely, 2)
         self.assertIsInstance(task.id_, UUID)
 
     def test_required_fields(self):
@@ -85,7 +85,7 @@ class TestTaskGroup(unittest.TestCase):
         Test the add_task method when the task is already in the group.
         """
         task_group = TaskGroup(name="Test")
-        task = Task(name="Test", optimistic=1, pessimistic=2, likely=3)
+        task = Task(name="Test", optimistic=1, pessimistic=3, likely=2)
         added = task_group.add_task(task)
         self.assertTrue(added)
         added_again = task_group.add_task(task)
@@ -96,6 +96,6 @@ class TestTaskGroup(unittest.TestCase):
         """Test the task_count property."""
         task_group = TaskGroup(name="Test")
         self.assertEqual(task_group.task_count, 0)
-        task = Task(name="Test", optimistic=1, pessimistic=2, likely=3)
+        task = Task(name="Test", optimistic=1, pessimistic=3, likely=2)
         task_group.add_task(task)
         self.assertEqual(task_group.task_count, 1)
