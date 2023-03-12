@@ -39,11 +39,17 @@ class Project(BaseModel):
         description="The number of weeks off per year the average developer gets",
     )
     weekly_work_days: List[int] = Field(
-        default=[0, 1, 2, 3, 4, ],
+        default=[
+            0,
+            1,
+            2,
+            3,
+            4,
+        ],
         description=(
             "Days of the week that are considered work days. "
             "These start on Monday and are zero-indexed."
-        )
+        ),
     )
     work_hours_per_day: float = Field(
         default=8.0,  # 8 hours per day
