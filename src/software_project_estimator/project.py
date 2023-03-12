@@ -38,9 +38,18 @@ class Project(BaseModel):
         default=2.0,  # 2 weeks off per year
         description="The number of weeks off per year the average developer gets",
     )
-    work_days_per_week: float = Field(
-        default=5.0,  # 5 days per week
-        description="The number of work days per week the average developer works",
+    weekly_work_days: List[int] = Field(
+        default=[
+            0,
+            1,
+            2,
+            3,
+            4,
+        ],
+        description=(
+            "Days of the week that are considered work days. "
+            "These start on Monday and are zero-indexed."
+        ),
     )
     work_hours_per_day: float = Field(
         default=8.0,  # 8 hours per day
@@ -64,6 +73,11 @@ class Project(BaseModel):
     distribution: dict = {}
     endings: dict = {}
     _work_holidays: dict = {}
+
+    @property
+    def work_days_per_week(self) -> int:
+        """Returns the number of work days per week."""
+        return len(self.weekly_work_days)
 
     @property
     def work_week_hours(self) -> float:
