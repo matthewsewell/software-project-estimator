@@ -59,6 +59,8 @@ class IterationContext:
     """
 
     project: Optional[Project] = None
+    attributes: dict = {}
+    person_days_remaining: Optional[float] = None
     result: Optional[IterationResult] = None
 
     # This is the temporary result of the iteration. It is used to store what
@@ -113,10 +115,27 @@ class IterationStateUninitialized(IterationBaseState):
     The Uninitialized state is the initial state of the iteration.
     """
 
+    async def has_valid_project(self) -> bool:
+        """Check if the project is valid."""
+        if not self.context.project or not isinstance(self.context.project, Project):
+            return False
+        return True
+
+    async def has_tasks_or_task_groups(self) -> bool:
+        """Check if the project has tasks or task groups."""
+        if all(
+            [
+                not self.context.project.tasks,
+                not self.context.project.task_groups,
+            ]
+        ):
+            return False
+        return True
+
     async def handle_process(self) -> None:
         """This is where we initialize the iteration."""
         logger.debug("Iteration is initializing.")
-        if not self.context.project or not isinstance(self.context.project, Project):
+        if not await self.has_valid_project():
             self.context.provisional_result = IterationResult(
                 status=IterationResultStatus.FAILURE,
                 message="No project was provided.",
@@ -124,18 +143,19 @@ class IterationStateUninitialized(IterationBaseState):
             self.context.transition_to(IterationStateError())
             return
 
-        if all(
-            [
-                not self.context.project.tasks,
-                not self.context.project.task_groups,
-            ]
-        ):
+        if not await self.has_tasks_or_task_groups():
             self.context.provisional_result = IterationResult(
                 status=IterationResultStatus.FAILURE,
                 message="No tasks were present in the project.",
             )
             self.context.transition_to(IterationStateError())
             return
+
+        # Set all initial values
+        self.context.attributes["start_date"] = self.context.project.start_date
+        self.context.attributes["end_date"] = None
+        self.context.person_days_remaining = \
+        self.context.project.random_estimated_project_person_days()
 
         self.context.transition_to(IterationStateSuccessful())
 
@@ -159,12 +179,9 @@ class IterationStateSuccessful(IterationBaseState):
     """
 
     async def handle_process(self) -> None:
-        logger.debug("Iteration is successful.")
-        end_date = (
-            datetime.date.today()
-        )  # STUB: This should be the end date of the iteration.
+        logger.debug("Iteration was successful.")
         self.context.result = IterationResult(
             status=IterationResultStatus.SUCCESS,
             message="Iteration completed successfully.",
-            attributes={"end_date": end_date},
+            attributes=self.context.attributes,
         )
