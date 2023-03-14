@@ -4,6 +4,7 @@ This provides a single iteration for the monte carlo simulation.
 
 import datetime
 import logging
+import time
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Optional
@@ -62,6 +63,7 @@ class IterationContext:
     attributes: dict = {}
     person_days_remaining: Optional[float] = None
     result: Optional[IterationResult] = None
+    current_date: Optional[datetime.date] = None
 
     # This is the temporary result of the iteration. It is used to store what
     # we think is the result of the iteration until we formatlize it by setting
@@ -110,6 +112,52 @@ class IterationBaseState(ABC):
         raise NotImplementedError
 
 
+class IterationStateCalculatingWeeks(IterationBaseState):
+    """
+    This state is responsible for calculating the number of whole weeks in the
+    iteration.
+    """
+
+    async def handle_process(self) -> None:
+        """Calculate the number of whole weeks in the iteration."""
+        print("Calculating weeks...")
+        time.sleep(5)
+        # STUB. Just passing to the next state for now.
+        self.context.transition_to(IterationStateCalculatingDays())
+
+
+class IterationStateCalculatingDays(IterationBaseState):
+    """
+    This state is responsible for calculating the number of whole days in the
+    iteration.
+    """
+
+    async def handle_process(self) -> None:
+        """
+        Calculate the number of days in the iteration once the weeks have been
+        calculated.
+        """
+        print("Calculating days...")
+        time.sleep(5)
+
+        # STUB. Just passing to the next state for now.
+        self.context.transition_to(IterationStateFinalizing())
+
+
+class IterationStateFinalizing(IterationBaseState):
+    """
+    This state is responsible for finalizing the iteration.
+    """
+
+    async def handle_process(self) -> None:
+        """Finalize the iteration."""
+
+        print("Finalizing...")
+        time.sleep(5)
+        # STUB. Just passing to the next state for now.
+        self.context.transition_to(IterationStateSuccessful())
+
+
 class IterationStateUninitialized(IterationBaseState):
     """
     The Uninitialized state is the initial state of the iteration.
@@ -125,8 +173,8 @@ class IterationStateUninitialized(IterationBaseState):
         """Check if the project has tasks or task groups."""
         if all(
             [
-                not self.context.project.tasks,
-                not self.context.project.task_groups,
+                self.context.project and not self.context.project.tasks,
+                self.context.project and not self.context.project.task_groups,
             ]
         ):
             return False
@@ -152,12 +200,22 @@ class IterationStateUninitialized(IterationBaseState):
             return
 
         # Set all initial values
-        self.context.attributes["start_date"] = self.context.project.start_date
-        self.context.attributes["end_date"] = None
-        self.context.person_days_remaining = \
-        self.context.project.random_estimated_project_person_days()
+        if self.context.project is not None:
+            self.context.current_date = self.context.project.start_date
+        else:
+            self.context.current_date = None
 
-        self.context.transition_to(IterationStateSuccessful())
+        self.context.attributes["start_date"] = self.context.current_date
+
+        self.context.attributes["end_date"] = None
+        if self.context.project is not None:
+            self.context.person_days_remaining = (
+                self.context.project.random_estimated_project_person_days()
+            )
+        else:
+            self.context.person_days_remaining = 0
+
+        self.context.transition_to(IterationStateCalculatingWeeks())
 
 
 class IterationStateError(IterationBaseState):
