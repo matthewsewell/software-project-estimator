@@ -4,16 +4,19 @@ This provides a single iteration for the monte carlo simulation.
 
 import datetime
 import logging
-import time
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Optional
 
+import numpy
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from software_project_estimator import Project
 
 logger = logging.getLogger(__name__)
+
+
+WEEKS_IN_A_YEAR = 52
 
 
 class IterationResultStatus(str, Enum):
@@ -87,6 +90,38 @@ class IterationContext:
         """
         await self._state.handle_process()
 
+    def probabilistic_weekly_person_days_lost_to_vacations(self) -> int:
+        """
+        Returns a probabilistic number of person days theoretically lost to
+        vacations within a theoretical week.
+        """
+        if not self.project or self.project.weeks_off_per_year <= 0:
+            return 0
+        days = 0.0
+        for _index in range(self.project.developer_count):
+            maximum = WEEKS_IN_A_YEAR / self.project.weeks_off_per_year
+            if numpy.random.uniform(0.0, maximum) <= 1.0:
+                days += self.project.work_days_per_week
+        return int(days)
+
+    def probabilistic_estimated_project_person_days(self) -> float:
+        """
+        Returns a probabilistic number of estimated project person days. This is
+        based on the probability distribution of the project's tasks and is
+        useful in aggregating the results of multiple simulations.
+        """
+        days = 0.0
+        if not self.project:
+            return days
+        for task_group in self.project.task_groups:
+            for task in task_group.tasks:
+                days += numpy.random.normal(task.average, task.stddev)
+
+        for task in self.project.tasks:
+            days += numpy.random.normal(task.average, task.stddev)
+
+        return days
+
 
 class IterationBaseState(ABC):
     """
@@ -120,8 +155,7 @@ class IterationStateCalculatingWeeks(IterationBaseState):
 
     async def handle_process(self) -> None:
         """Calculate the number of whole weeks in the iteration."""
-        print("Calculating weeks...")
-        time.sleep(5)
+
         # STUB. Just passing to the next state for now.
         self.context.transition_to(IterationStateCalculatingDays())
 
@@ -137,8 +171,6 @@ class IterationStateCalculatingDays(IterationBaseState):
         Calculate the number of days in the iteration once the weeks have been
         calculated.
         """
-        print("Calculating days...")
-        time.sleep(5)
 
         # STUB. Just passing to the next state for now.
         self.context.transition_to(IterationStateFinalizing())
@@ -152,8 +184,6 @@ class IterationStateFinalizing(IterationBaseState):
     async def handle_process(self) -> None:
         """Finalize the iteration."""
 
-        print("Finalizing...")
-        time.sleep(5)
         # STUB. Just passing to the next state for now.
         self.context.transition_to(IterationStateSuccessful())
 
@@ -210,7 +240,7 @@ class IterationStateUninitialized(IterationBaseState):
         self.context.attributes["end_date"] = None
         if self.context.project is not None:
             self.context.person_days_remaining = (
-                self.context.project.random_estimated_project_person_days()
+                self.context.probabilistic_estimated_project_person_days()
             )
         else:
             self.context.person_days_remaining = 0
