@@ -8,7 +8,6 @@ from datetime import date, timedelta
 from typing import List
 
 import holidays
-import numpy
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
 from software_project_estimator.task import Task, TaskGroup

@@ -2,8 +2,7 @@
 import unittest
 from datetime import date
 
-from software_project_estimator.project import WEEKS_IN_A_YEAR, Project
-from software_project_estimator.task import Task, TaskGroup
+from software_project_estimator.project import Project
 
 
 class TestProject(unittest.TestCase):

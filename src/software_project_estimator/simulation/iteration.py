@@ -4,7 +4,6 @@ This provides a single iteration for the monte carlo simulation.
 
 import datetime
 import logging
-import time
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Optional
