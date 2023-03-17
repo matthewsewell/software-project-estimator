@@ -156,7 +156,14 @@ class IterationStateCalculatingWeeks(IterationBaseState):
     async def handle_process(self) -> None:
         """Calculate the number of whole weeks in the iteration."""
 
-        # TODO: Add some overrides for which conditions to apply.
+        if self.context.project is None:
+            self.context.provisional_result = IterationResult(
+                status=IterationResultStatus.FAILURE,
+                message="No project was provided.",
+            )
+            self.context.transition_to(IterationStateError())
+            return
+
         current_date = self.context.current_date
         maximum_weekly_days = self.context.project.max_person_days_per_week
         vacation_days = (
@@ -173,13 +180,22 @@ class IterationStateCalculatingWeeks(IterationBaseState):
             if probabilistic_person_days_this_week < 0
             else probabilistic_person_days_this_week
         )
-        if self.context.person_days_remaining <= probabilistic_person_days_this_week:
+        if (
+            self.context.person_days_remaining is not None
+            and self.context.person_days_remaining
+            <= probabilistic_person_days_this_week
+        ):
             # It's now days, not weeks
             self.context.transition_to(IterationStateCalculatingDays())
             return
 
-        self.context.current_date = current_date + datetime.timedelta(weeks=1)
-        self.context.person_days_remaining -= probabilistic_person_days_this_week
+        self.context.current_date = (
+            current_date + datetime.timedelta(weeks=1)
+            if current_date is not None
+            else self.context.current_date
+        )
+        if self.context.person_days_remaining is not None:
+            self.context.person_days_remaining -= probabilistic_person_days_this_week
 
 
 class IterationStateCalculatingDays(IterationBaseState):
