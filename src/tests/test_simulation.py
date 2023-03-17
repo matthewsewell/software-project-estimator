@@ -4,7 +4,11 @@ from datetime import date
 from unittest import mock
 
 from software_project_estimator.project import WEEKS_IN_A_YEAR, Project
-from software_project_estimator.simulation.iteration import Iteration
+from software_project_estimator.simulation.iteration import (
+    Iteration,
+    IterationStateCalculatingWeeks,
+    IterationStateError,
+)
 from software_project_estimator.task import Task, TaskGroup
 
 
@@ -137,6 +141,16 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
             [mock.call(date(2020, 1, 8)), mock.call(date(2020, 1, 15))]
         )
         args[1].assert_has_calls([mock.call(), mock.call()])
+
+    async def test_calculating_weeks_without_project(self):
+        """Ensure that we can't calculate weeks without a project."""
+        iteration = Iteration(project=None)
+        iteration.context.transition_to(IterationStateCalculatingWeeks())
+        await iteration.context.process()
+        self.assertIsInstance(
+            iteration.context._state,  # pylint: disable=protected-access
+            IterationStateError,
+        )
 
     @mock.patch(
         "software_project_estimator.simulation.iteration.IterationContext."
