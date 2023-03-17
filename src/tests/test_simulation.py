@@ -1,5 +1,7 @@
 """Unit tests for the Task class."""
 import unittest
+from datetime import date
+from unittest import mock
 
 from software_project_estimator.project import WEEKS_IN_A_YEAR, Project
 from software_project_estimator.simulation.iteration import Iteration
@@ -107,3 +109,57 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
             )
             # We should be getting a random number between 3 and 9
             self.assertTrue(3 <= estimated_days <= 9)
+
+    @mock.patch(
+        "software_project_estimator.simulation.iteration.IterationContext."
+        "probabilistic_weekly_person_days_lost_to_vacations",
+        return_value=0,
+    )
+    @mock.patch(
+        "software_project_estimator.Project.person_days_lost_to_holidays_this_week",
+        return_value=0,
+    )
+    async def test_calculating_weeks(self, *args):
+        """
+        Ensure that we calculate using the IterationStateCalculatingWeeks state
+        twice before continuing. The mock calls are the best indicator of this.
+        """
+        project = Project(name="Test", developer_count=1)
+        project.developer_count = 1
+        project.start_date = date(2020, 1, 1)
+
+        project.tasks = [
+            Task(name="Test", optimistic=12, pessimistic=12, likely=12),
+        ]
+        iteration = Iteration(project)
+        await iteration.run()
+        args[0].assert_has_calls(
+            [mock.call(date(2020, 1, 8)), mock.call(date(2020, 1, 15))]
+        )
+        args[1].assert_has_calls([mock.call(), mock.call()])
+
+    @mock.patch(
+        "software_project_estimator.simulation.iteration.IterationContext."
+        "probabilistic_weekly_person_days_lost_to_vacations",
+        return_value=0,
+    )
+    @mock.patch(
+        "software_project_estimator.Project.person_days_lost_to_holidays_this_week",
+        return_value=0,
+    )
+    async def test_skipping_calculating_weeks(self, *args):
+        """
+        If these mocks only get called once, it means that we skipped the weekly
+        and went straight to calculating days.
+        """
+        project = Project(name="Test", developer_count=1)
+        project.developer_count = 1
+        project.start_date = date(2020, 1, 1)
+
+        project.tasks = [
+            Task(name="Test", optimistic=1, pessimistic=1, likely=1),
+        ]
+        iteration = Iteration(project)
+        await iteration.run()
+        args[0].assert_called_once()
+        args[1].assert_called_once()

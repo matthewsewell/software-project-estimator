@@ -5,7 +5,7 @@ the Monte Carlo simulation and return the results.
 """
 
 from datetime import date, timedelta
-from typing import List
+from typing import List, Optional
 
 import holidays
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
@@ -112,8 +112,10 @@ class Project(BaseModel):
             self._work_holidays[this_date.year] = holidays_this_year
         return this_date in holidays_this_year
 
-    def person_days_lost_to_holidays_this_week(self, start_date: date) -> int:
+    def person_days_lost_to_holidays_this_week(self, start_date: Optional[date]) -> int:
         """Returns the number of person days lost to holidays this week."""
+        if start_date is None:
+            return 0
         days_lost = 0
         current_date = start_date
         for _day in range(DAYS_IN_A_WEEK):
