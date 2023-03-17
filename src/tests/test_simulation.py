@@ -71,6 +71,16 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
             )
         self.assertTrue(total_days > 0)
 
+    def test_probablistic_estimated_project_person_days_requires_a_project(self):
+        """
+        Test the probabilistic_estimated_person_days method requires a project.
+        """
+        iteration = Iteration(project=None)
+        self.assertEqual(
+            iteration.context.probabilistic_estimated_project_person_days(),
+            0.0,
+        )
+
     def test_probabilistic_estimated_project_person_days(self):
         """
         Test the probabilistic_estimated_project_person_days method.
