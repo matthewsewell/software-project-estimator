@@ -126,3 +126,8 @@ class TestProject(unittest.TestCase):
         self.assertEqual(
             project.person_days_lost_to_holidays_this_week(date(2023, 12, 22)), 5
         )
+
+    def test_person_days_lost_to_holidays_this_week_with_none_date(self):
+        """Test the person_days_lost_to_holidays_this_week method."""
+        project = Project(name="Test", developer_count=5)
+        self.assertEqual(project.person_days_lost_to_holidays_this_week(None), 0)

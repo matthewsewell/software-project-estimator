@@ -4,8 +4,14 @@ from datetime import date
 from unittest import mock
 
 from software_project_estimator.project import WEEKS_IN_A_YEAR, Project
-from software_project_estimator.simulation.iteration import Iteration
 from software_project_estimator.task import Task, TaskGroup
+
+from software_project_estimator.simulation.iteration import (  # isort: skip
+    Iteration,
+    IterationBaseState,
+    IterationStateCalculatingWeeks,
+    IterationStateError,
+)
 
 
 class TestIteration(unittest.IsolatedAsyncioTestCase):
@@ -73,6 +79,16 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
             )
         self.assertTrue(total_days > 0)
 
+    def test_probablistic_estimated_project_person_days_requires_a_project(self):
+        """
+        Test the probabilistic_estimated_person_days method requires a project.
+        """
+        iteration = Iteration(project=None)
+        self.assertEqual(
+            iteration.context.probabilistic_estimated_project_person_days(),
+            0.0,
+        )
+
     def test_probabilistic_estimated_project_person_days(self):
         """
         Test the probabilistic_estimated_project_person_days method.
@@ -128,6 +144,16 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         )
         args[1].assert_has_calls([mock.call(), mock.call()])
 
+    async def test_calculating_weeks_without_project(self):
+        """Ensure that we can't calculate weeks without a project."""
+        iteration = Iteration(project=None)
+        iteration.context.transition_to(IterationStateCalculatingWeeks())
+        await iteration.context.process()
+        self.assertIsInstance(
+            iteration.context._state,  # pylint: disable=protected-access
+            IterationStateError,
+        )
+
     @mock.patch(
         "software_project_estimator.simulation.iteration.IterationContext."
         "probabilistic_weekly_person_days_lost_to_vacations",
@@ -153,3 +179,30 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         await iteration.run()
         args[0].assert_called_once()
         args[1].assert_called_once()
+
+    def test_iteration_base_state_handle_process_not_implemented(self):
+        """Ensure that the base state raises an exception."""
+
+        class FakeState(IterationBaseState):
+            """Totally fake state."""
+
+        with self.assertRaisesRegex(
+            TypeError,
+            (
+                "Can't instantiate abstract class FakeState with abstract "
+                "method handle_process"
+            ),
+        ):
+            FakeState()  # pylint: disable=abstract-class-instantiated
+
+    async def test_iteration_base_state_handle_process_implemeted(self):
+        """Ensure that things actually work if we include the method."""
+
+        class FakeState(IterationBaseState):
+            """Totally fake state."""
+
+            async def handle_process(self):
+                pass
+
+        state = FakeState()
+        self.assertEqual(await state.handle_process(), None)
