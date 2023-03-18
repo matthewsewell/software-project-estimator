@@ -267,28 +267,21 @@ class IterationStateUninitialized(IterationBaseState):
             self.context.transition_to(IterationStateError())
             return
 
-        # Set all initial values
-        if self.context.project is not None:
-            self.context.current_date = self.context.project.start_date
-        else:
-            self.context.current_date = None
-
+        # Set all initial values. We can ignore the type here because we can't
+        # get to this section of code without a project.
+        self.context.current_date = self.context.project.start_date  # type: ignore
         self.context.attributes["start_date"] = self.context.current_date
-
         self.context.attributes["end_date"] = None
-        if self.context.project is not None:
-            self.context.person_days_remaining = (
-                self.context.probabilistic_estimated_project_person_days()
-            )
-        else:
-            self.context.person_days_remaining = 0
+        self.context.person_days_remaining = ( # type: ignore
+            self.context.probabilistic_estimated_project_person_days()
+        )
 
         self.context.transition_to(IterationStateCalculatingWeeks())
 
 
 class IterationStateError(IterationBaseState):
     """
-    The Error state is the state of the iteration when an error has occurred.
+    The Error state is the state of the iteration when an error has occurred
     """
 
     async def handle_process(self) -> None:

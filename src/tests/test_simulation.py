@@ -6,6 +6,7 @@ from unittest import mock
 from software_project_estimator.project import WEEKS_IN_A_YEAR, Project
 from software_project_estimator.simulation.iteration import (
     Iteration,
+    IterationBaseState,
     IterationStateCalculatingWeeks,
     IterationStateError,
 )
@@ -177,3 +178,28 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         await iteration.run()
         args[0].assert_called_once()
         args[1].assert_called_once()
+
+    def test_iteration_base_state_handle_process_not_implemented(self):
+        """Ensure that the base state raises an exception."""
+
+        class FakeState(IterationBaseState):
+            """Totally fake state."""
+
+        with self.assertRaisesRegex(
+            TypeError,
+            (
+                "Can't instantiate abstract class FakeState with abstract "
+                "method handle_process"
+            ),
+        ):
+            FakeState()  #pylint: disable=abstract-class-instantiated
+
+    async def test_iteration_base_state_handle_process_implemeted(self):
+        """Ensure that things actually work if we include the method."""
+        class FakeState(IterationBaseState):
+            """Totally fake state."""
+            async def handle_process(self):
+                pass
+
+        state = FakeState()
+        self.assertEqual(await state.handle_process(), None)
