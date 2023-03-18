@@ -272,7 +272,7 @@ class IterationStateUninitialized(IterationBaseState):
         self.context.current_date = self.context.project.start_date  # type: ignore
         self.context.attributes["start_date"] = self.context.current_date
         self.context.attributes["end_date"] = None
-        self.context.person_days_remaining = ( # type: ignore
+        self.context.person_days_remaining = (  # type: ignore
             self.context.probabilistic_estimated_project_person_days()
         )
 

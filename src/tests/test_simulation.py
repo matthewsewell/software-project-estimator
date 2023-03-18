@@ -192,12 +192,14 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
                 "method handle_process"
             ),
         ):
-            FakeState()  #pylint: disable=abstract-class-instantiated
+            FakeState()  # pylint: disable=abstract-class-instantiated
 
     async def test_iteration_base_state_handle_process_implemeted(self):
         """Ensure that things actually work if we include the method."""
+
         class FakeState(IterationBaseState):
             """Totally fake state."""
+
             async def handle_process(self):
                 pass
 
