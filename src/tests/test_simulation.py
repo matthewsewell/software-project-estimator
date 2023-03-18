@@ -5,11 +5,8 @@ from unittest import mock
 
 from software_project_estimator.project import WEEKS_IN_A_YEAR, Project
 from software_project_estimator.simulation.iteration import (
-    Iteration,
-    IterationBaseState,
-    IterationStateCalculatingWeeks,
-    IterationStateError,
-)
+    Iteration, IterationBaseState, IterationStateCalculatingWeeks,
+    IterationStateError)
 from software_project_estimator.task import Task, TaskGroup
 
 
