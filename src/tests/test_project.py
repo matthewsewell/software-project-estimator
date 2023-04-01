@@ -131,3 +131,26 @@ class TestProject(unittest.TestCase):
         """Test the person_days_lost_to_holidays_this_week method."""
         project = Project(name="Test", developer_count=5)
         self.assertEqual(project.person_days_lost_to_holidays_this_week(None), 0)
+
+    def test_working_days_whis_week(self):
+        """Test the working_days_this_week method."""
+        project = Project(name="Test")
+        self.assertEqual(
+            project.working_days_this_week(date(2020, 1, 1)),
+            [
+                date(2020, 1, 2),
+                date(2020, 1, 3),
+                date(2020, 1, 6),
+                date(2020, 1, 7),
+            ],
+        )
+        project.start_date = date(2020, 1, 6)
+        # self.assertEqual(
+        #     project.working_days_this_week(date(2020, 1, 6)),
+        #     [
+        #         date(2020, 1, 6),
+        #         date(2020, 1, 7),
+        #         date(2020, 1, 8),
+        #         date(2020, 1, 9),
+        #     ]
+        # )

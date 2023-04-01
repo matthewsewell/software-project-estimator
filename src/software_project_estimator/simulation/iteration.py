@@ -3,6 +3,7 @@ This provides a single iteration for the monte carlo simulation.
 """
 
 import datetime
+import math
 import logging
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -65,6 +66,8 @@ class IterationContext:
     project: Optional[Project] = None
     attributes: dict = {}
     person_days_remaining: Optional[float] = None
+    remainder_days: float = 0.0
+    working_days_left: Optional[float] = None
     result: Optional[IterationResult] = None
     current_date: Optional[datetime.date] = None
 
@@ -186,6 +189,7 @@ class IterationStateCalculatingWeeks(IterationBaseState):
             <= probabilistic_person_days_this_week
         ):
             # It's now days, not weeks
+            self.context.remainder_days = probabilistic_person_days_this_week
             self.context.transition_to(IterationStateCalculatingDays())
             return
 
@@ -210,8 +214,40 @@ class IterationStateCalculatingDays(IterationBaseState):
         calculated.
         """
 
-        # STUB. Just passing to the next state for now.
-        self.context.transition_to(IterationStateFinalizing())
+        # The person days remaining are the number of person days left from the
+        # estimated person days for the project after we've subtracted off all
+        # the whole weeks. Remainder days is the remainder of the probablistic
+        # person days calculated for the week. The ratio of the person days
+        # remaining to the remainder days is the portion of the week that we
+        # need to completed. By multiplying that by the number of work days in
+        # a week, we get the number of working (calendar) days left in the
+        # week. We only need to caluculate this the first time we're in this
+        # state.
+        if self.context.working_days_left is None:
+            num_working_days = len(
+                self.context.project.working_days_this_week(self.context.current_date)
+            )
+            portion_of_week = (
+                self.context.person_days_remaining / self.context.remainder_days
+            )
+            self.context.working_days_left = portion_of_week * num_working_days
+
+        # Lets consider the day we're on today. If it's a holiday or a weekend,
+        # we need to skip it. If it's a working day, we need to decrement the
+        # working days left by one. If we've reached zero working days left,
+        # we need to transition to the finalizing state.
+
+        if (
+            self.context.current_date.weekday()
+            not in self.context.project.weekly_work_days
+            or self.context.project.is_holiday(self.context.current_date)
+        ):
+            self.context.current_date += datetime.timedelta(days=1)
+        else:
+            self.context.working_days_left -= 1
+            self.context.current_date += datetime.timedelta(days=1)
+            if self.context.working_days_left <= 0:
+                self.context.transition_to(IterationStateFinalizing())
 
 
 class IterationStateFinalizing(IterationBaseState):
@@ -222,7 +258,16 @@ class IterationStateFinalizing(IterationBaseState):
     async def handle_process(self) -> None:
         """Finalize the iteration."""
 
-        # STUB. Just passing to the next state for now.
+        if (
+            self.context.current_date.weekday()
+            not in self.context.project.weekly_work_days
+            or self.context.project.is_holiday(self.context.current_date)
+        ):
+            self.context.current_date += datetime.timedelta(days=1)
+            return
+
+        self.context.attributes = {"end_date": self.context.current_date}
+
         self.context.transition_to(IterationStateSuccessful())
 
 
