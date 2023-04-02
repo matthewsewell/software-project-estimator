@@ -69,8 +69,6 @@ class Project(BaseModel):
         default=[],
         description="The task groups in the project",
     )
-    distribution: dict = {}
-    endings: dict = {}
     _work_holidays: dict = {}
 
     @property
@@ -112,7 +110,9 @@ class Project(BaseModel):
             self._work_holidays[this_date.year] = holidays_this_year
         return this_date in holidays_this_year
 
-    def person_days_lost_to_holidays_this_week(self, start_date: Optional[date]) -> int:
+    def person_days_lost_to_holidays_this_week(
+        self, start_date: Optional[date]
+    ) -> int:
         """Returns the number of person days lost to holidays this week."""
         if start_date is None:
             return 0

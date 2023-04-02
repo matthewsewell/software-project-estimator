@@ -8,7 +8,10 @@ from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from software_project_estimator import Project
 from software_project_estimator.simulation.iteration import (
-    Iteration, IterationResult, IterationResultStatus)
+    Iteration,
+    IterationResult,
+    IterationResultStatus,
+)
 
 
 class MonteCarloOutcome(BaseModel):  # pylint: disable=too-few-public-methods
@@ -19,7 +22,9 @@ class MonteCarloOutcome(BaseModel):  # pylint: disable=too-few-public-methods
 
 
 class MonteCarlo:  # pylint: disable=too-few-public-methods
-    """This class manages the monte carlo simulation for the project estimator."""
+    """
+    This class manages the monte carlo simulation for the project estimator.
+    """
 
     def __init__(self, project: Project, iterations: int):
         """Initialize the monte carlo simulation."""
@@ -28,8 +33,8 @@ class MonteCarlo:  # pylint: disable=too-few-public-methods
 
     def run(self) -> dict:
         """
-        Run the monte carlo simulation using multiprocessing. Return a dictionary
-        of the results.
+        Run the monte carlo simulation using multiprocessing. Return a
+        dictionary of the results.
         """
         with multiprocessing.Pool() as pool:
             results = pool.map(self._run_iteration, range(self.iterations))

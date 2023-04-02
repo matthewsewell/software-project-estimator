@@ -63,7 +63,6 @@ class IterationContext:
     """
 
     project: Optional[Project] = None
-    attributes: dict = {}
     person_days_remaining: Optional[float] = None
     remainder_days: float = 0.0
     working_days_left: Optional[float] = None
@@ -108,8 +107,8 @@ class IterationContext:
 
     def probabilistic_estimated_project_person_days(self) -> float:
         """
-        Returns a probabilistic number of estimated project person days. This is
-        based on the probability distribution of the project's tasks and is
+        Returns a probabilistic number of estimated project person days. This
+        is based on the probability distribution of the project's tasks and is
         useful in aggregating the results of multiple simulations.
         """
         days = 0.0
@@ -297,8 +296,11 @@ class IterationStateFinalizing(IterationBaseState):
 
         self.context.provisional_result = IterationResult(
             status=IterationResultStatus.SUCCESS,
-            message="No project was provided.",
-            attributes={"end_date": self.context.current_date},
+            message="Process completed.",
+            attributes={
+                "start_date": self.context.current_date,
+                "end_date": self.context.current_date
+            },
         )
 
         self.context.transition_to(IterationStateSuccessful())
@@ -348,8 +350,6 @@ class IterationStateUninitialized(IterationBaseState):
         # Set all initial values. We can ignore the type here because we can't
         # get to this section of code without a project.
         self.context.current_date = self.context.project.start_date  # type: ignore
-        self.context.attributes["start_date"] = self.context.current_date
-        self.context.attributes["end_date"] = None
         self.context.person_days_remaining = (  # type: ignore
             self.context.probabilistic_estimated_project_person_days()
         )
