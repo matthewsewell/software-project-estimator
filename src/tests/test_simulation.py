@@ -206,3 +206,81 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
 
         state = FakeState()
         self.assertEqual(await state.handle_process(), None)
+
+    async def test_calculating_days(self):
+        """
+        Ensure that we calculate using the IterationStateCalculatingDays state
+        ultiple times before continuing.
+        """
+        project = Project(name="Test")
+        project.developer_count = 1
+        project.start_date = date(2020, 1, 1)
+        project.weeks_off_per_year = 0
+
+        project.tasks = [
+            Task(name="Test", optimistic=12, pessimistic=12, likely=12),
+        ]
+
+        iteration = Iteration(project)
+        await iteration.run()
+
+        # If we started on 1/1/2020, we should have 12 person days. With
+        # holidays and weekends that should come out to 17 calendar days.
+        # The actual end date would then be the next day after there was any
+        # activity. If we had worked through the 17th that would skip over MLK
+        # day and end on the next day, which is the 21st.
+        expected_end_date = date(2020, 1, 21)
+        self.assertIsNotNone(iteration.result)
+        self.assertIsNotNone(iteration.result.attributes)
+        self.assertIsNotNone(iteration.result.attributes.get("end_date"))
+        self.assertEqual(iteration.result.attributes.get("end_date"), expected_end_date)
+
+    async def test_calculating_days_with_multiple_devlopers(self):
+        """Same thing but with multiple developers."""
+        project = Project(name="Test")
+        project.developer_count = 2
+        project.communication_penalty = 0
+        project.start_date = date(2020, 1, 1)
+        project.weeks_off_per_year = 0
+
+        project.tasks = [
+            Task(name="Test", optimistic=12, pessimistic=12, likely=12),
+        ]
+
+        iteration = Iteration(project)
+        await iteration.run()
+
+        # If we started on 1/1/2020, we should have 12 person days. With two
+        # developers who are not communicating, that should be 6 working
+        # calendar days. The actual end date would then be the next day after
+        # that, which is the 10th when we account for New Year's Day.
+        expected_end_date = date(2020, 1, 10)
+        self.assertIsNotNone(iteration.result)
+        self.assertIsNotNone(iteration.result.attributes)
+        self.assertIsNotNone(iteration.result.attributes.get("end_date"))
+        self.assertEqual(iteration.result.attributes.get("end_date"), expected_end_date)
+
+    async def test_calculating_days_with_multiple_devlopers_communicating(self):
+        """Same thing but with multiple developers and communication."""
+        project = Project(name="Test")
+        project.developer_count = 2
+        project.communication_penalty = 0.5
+        project.start_date = date(2020, 1, 1)
+        project.weeks_off_per_year = 0
+
+        project.tasks = [
+            Task(name="Test", optimistic=12, pessimistic=12, likely=12),
+        ]
+
+        iteration = Iteration(project)
+        await iteration.run()
+
+        # If we started on 1/1/2020, we should have 12 person days. With two
+        # developers who are communicating, that should be slightly more than
+        # 6 working calendar days. The actual end date would then be the next
+        # working day after that, which is the 13th.
+        expected_end_date = date(2020, 1, 13)
+        self.assertIsNotNone(iteration.result)
+        self.assertIsNotNone(iteration.result.attributes)
+        self.assertIsNotNone(iteration.result.attributes.get("end_date"))
+        self.assertEqual(iteration.result.attributes.get("end_date"), expected_end_date)
