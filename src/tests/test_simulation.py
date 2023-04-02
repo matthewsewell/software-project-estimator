@@ -4,6 +4,8 @@ from datetime import date
 from unittest import mock
 
 from software_project_estimator.project import WEEKS_IN_A_YEAR, Project
+from software_project_estimator.simulation.monte_carlo import (
+    MonteCarlo, MonteCarloOutcome)
 from software_project_estimator.task import Task, TaskGroup
 
 from software_project_estimator.simulation.iteration import (  # isort: skip
@@ -14,34 +16,34 @@ from software_project_estimator.simulation.iteration import (  # isort: skip
 )
 
 
-class TestIteration(unittest.IsolatedAsyncioTestCase):
+class TestIteration(unittest.TestCase):
     """Unit tests for the Iteration class."""
 
-    async def test_iteration_requires_a_project_to_complete(self):
+    def test_iteration_requires_a_project_to_complete(self):
         """Ensure that the iteration requires a project to complete."""
         iteration = Iteration(project=None)
-        await iteration.run()
+        iteration.run()
         self.assertIsNotNone(iteration.result)
         self.assertEqual(iteration.result.status, "failure")
         self.assertEqual(iteration.result.message, "No project was provided.")
 
-    async def test_iteration_requires_tasks_to_complete(self):
+    def test_iteration_requires_tasks_to_complete(self):
         """Ensure that the iteration requires tasks to complete."""
         project = Project(name="Test")
         iteration = Iteration(project)
-        await iteration.run()
+        iteration.run()
         self.assertIsNotNone(iteration.result)
         self.assertEqual(iteration.result.status, "failure")
         self.assertEqual(
             iteration.result.message, "No tasks were present in the project."
         )
 
-    async def test_iteration_completes_successfully(self):
+    def test_iteration_completes_successfully(self):
         """Ensure that the iteration completes."""
         project = Project(name="Test")
         project.tasks = [Task(name="Test", optimistic=1, likely=2, pessimistic=3)]
         iteration = Iteration(project)
-        await iteration.run()
+        iteration.run()
         self.assertIsNotNone(iteration.result)
         self.assertEqual(iteration.result.status, "success")
 
@@ -125,7 +127,7 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         "software_project_estimator.Project.person_days_lost_to_holidays_this_week",
         return_value=0,
     )
-    async def test_calculating_weeks(self, *args):
+    def test_calculating_weeks(self, *args):
         """
         Ensure that we calculate using the IterationStateCalculatingWeeks state
         twice before continuing. The mock calls are the best indicator of this.
@@ -138,17 +140,17 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
             Task(name="Test", optimistic=12, pessimistic=12, likely=12),
         ]
         iteration = Iteration(project)
-        await iteration.run()
+        iteration.run()
         args[0].assert_has_calls(
             [mock.call(date(2020, 1, 8)), mock.call(date(2020, 1, 15))]
         )
         args[1].assert_has_calls([mock.call(), mock.call()])
 
-    async def test_calculating_weeks_without_project(self):
+    def test_calculating_weeks_without_project(self):
         """Ensure that we can't calculate weeks without a project."""
         iteration = Iteration(project=None)
         iteration.context.transition_to(IterationStateCalculatingWeeks())
-        await iteration.context.process()
+        iteration.context.process()
         self.assertIsInstance(
             iteration.context._state,  # pylint: disable=protected-access
             IterationStateError,
@@ -163,7 +165,7 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         "software_project_estimator.Project.person_days_lost_to_holidays_this_week",
         return_value=0,
     )
-    async def test_skipping_calculating_weeks(self, *args):
+    def test_skipping_calculating_weeks(self, *args):
         """
         If these mocks only get called once, it means that we skipped the weekly
         and went straight to calculating days.
@@ -176,7 +178,7 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
             Task(name="Test", optimistic=1, pessimistic=1, likely=1),
         ]
         iteration = Iteration(project)
-        await iteration.run()
+        iteration.run()
         args[0].assert_called_once()
         args[1].assert_called_once()
 
@@ -195,19 +197,19 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         ):
             FakeState()  # pylint: disable=abstract-class-instantiated
 
-    async def test_iteration_base_state_handle_process_implemeted(self):
+    def test_iteration_base_state_handle_process_implemeted(self):
         """Ensure that things actually work if we include the method."""
 
         class FakeState(IterationBaseState):
             """Totally fake state."""
 
-            async def handle_process(self):
+            def handle_process(self):
                 pass
 
         state = FakeState()
-        self.assertEqual(await state.handle_process(), None)
+        self.assertEqual(state.handle_process(), None)
 
-    async def test_calculating_days(self):
+    def test_calculating_days(self):
         """
         Ensure that we calculate using the IterationStateCalculatingDays state
         ultiple times before continuing.
@@ -222,7 +224,7 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         ]
 
         iteration = Iteration(project)
-        await iteration.run()
+        iteration.run()
 
         # If we started on 1/1/2020, we should have 12 person days. With
         # holidays and weekends that should come out to 17 calendar days.
@@ -235,7 +237,7 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(iteration.result.attributes.get("end_date"))
         self.assertEqual(iteration.result.attributes.get("end_date"), expected_end_date)
 
-    async def test_calculating_days_with_multiple_devlopers(self):
+    def test_calculating_days_with_multiple_devlopers(self):
         """Same thing but with multiple developers."""
         project = Project(name="Test")
         project.developer_count = 2
@@ -248,7 +250,7 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         ]
 
         iteration = Iteration(project)
-        await iteration.run()
+        iteration.run()
 
         # If we started on 1/1/2020, we should have 12 person days. With two
         # developers who are not communicating, that should be 6 working
@@ -260,7 +262,7 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(iteration.result.attributes.get("end_date"))
         self.assertEqual(iteration.result.attributes.get("end_date"), expected_end_date)
 
-    async def test_calculating_days_with_multiple_devlopers_communicating(self):
+    def test_calculating_days_with_multiple_devlopers_communicating(self):
         """Same thing but with multiple developers and communication."""
         project = Project(name="Test")
         project.developer_count = 2
@@ -273,7 +275,7 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         ]
 
         iteration = Iteration(project)
-        await iteration.run()
+        iteration.run()
 
         # If we started on 1/1/2020, we should have 12 person days. With two
         # developers who are communicating, that should be slightly more than
@@ -284,3 +286,28 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(iteration.result.attributes)
         self.assertIsNotNone(iteration.result.attributes.get("end_date"))
         self.assertEqual(iteration.result.attributes.get("end_date"), expected_end_date)
+
+    def test_monte_carlo(self):
+        """Ensure that we can run a Monte Carlo simulation."""
+        project = Project(name="Test")
+        project.developer_count = 1
+        project.start_date = date(2020, 1, 1)
+        project.weeks_off_per_year = 0
+
+        project.tasks = [
+            Task(name="Test", optimistic=5, pessimistic=12, likely=10),
+        ]
+
+        monte = MonteCarlo(project, 1_000)
+        results = monte.run()
+
+        self.assertTrue(len(results))  # We should have some results.
+        # MLK day should not be one of them
+        self.assertIsNone(results.get(date(2020, 1, 20)))
+        totals = {"count": 0, "percentage": 0.0}
+        for result in results.values():
+            totals["count"] += result.total
+            totals["percentage"] += result.probability
+            self.assertIsInstance(result, MonteCarloOutcome)
+        self.assertEqual(totals["count"], 1_000)
+        self.assertAlmostEqual(totals["percentage"], 1.0)
