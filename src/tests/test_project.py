@@ -145,12 +145,13 @@ class TestProject(unittest.TestCase):
             ],
         )
         project.start_date = date(2020, 1, 6)
-        # self.assertEqual(
-        #     project.working_days_this_week(date(2020, 1, 6)),
-        #     [
-        #         date(2020, 1, 6),
-        #         date(2020, 1, 7),
-        #         date(2020, 1, 8),
-        #         date(2020, 1, 9),
-        #     ]
-        # )
+        self.assertEqual(
+            project.working_days_this_week(date(2020, 1, 6)),
+            [
+                date(2020, 1, 6),
+                date(2020, 1, 7),
+                date(2020, 1, 8),
+                date(2020, 1, 9),
+                date(2020, 1, 10),
+            ]
+        )
