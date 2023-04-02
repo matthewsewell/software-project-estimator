@@ -207,7 +207,7 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         state = FakeState()
         self.assertEqual(await state.handle_process(), None)
 
-    async def test_calculating_days(self, *args):
+    async def test_calculating_days(self):
         """
         Ensure that we calculate using the IterationStateCalculatingDays state
         ultiple times before continuing.
@@ -235,7 +235,8 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(iteration.result.attributes.get("end_date"))
         self.assertEqual(iteration.result.attributes.get("end_date"), expected_end_date)
 
-    async def test_calculating_days_with_multiple_devlopers(self, *args):
+    async def test_calculating_days_with_multiple_devlopers(self):
+        """Same thing but with multiple developers."""
         project = Project(name="Test")
         project.developer_count = 2
         project.communication_penalty = 0
@@ -259,7 +260,8 @@ class TestIteration(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(iteration.result.attributes.get("end_date"))
         self.assertEqual(iteration.result.attributes.get("end_date"), expected_end_date)
 
-    async def test_calculating_days_with_multiple_devlopers_communicating(self, *args):
+    async def test_calculating_days_with_multiple_devlopers_communicating(self):
+        """Same thing but with multiple developers and communication."""
         project = Project(name="Test")
         project.developer_count = 2
         project.communication_penalty = 0.5

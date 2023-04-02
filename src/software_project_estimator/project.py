@@ -124,11 +124,13 @@ class Project(BaseModel):
             current_date += timedelta(days=1)
         return days_lost
 
-    def working_days_this_week(self, date: date) -> list:
+    def working_days_this_week(self, start_date: date) -> list:
         """Returns all the days this week that are work days."""
         working_days = []
         for _day in range(DAYS_IN_A_WEEK):
-            if date.weekday() in self.weekly_work_days and not self.is_holiday(date):
-                working_days.append(date)
-            date += timedelta(days=1)
+            if start_date.weekday() in self.weekly_work_days and not self.is_holiday(
+                start_date
+            ):
+                working_days.append(start_date)
+            start_date += timedelta(days=1)
         return working_days

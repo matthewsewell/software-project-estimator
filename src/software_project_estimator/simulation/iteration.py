@@ -3,7 +3,6 @@ This provides a single iteration for the monte carlo simulation.
 """
 
 import datetime
-import math
 import logging
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -214,6 +213,21 @@ class IterationStateCalculatingDays(IterationBaseState):
         calculated.
         """
 
+        if self.context.project is None:
+            self.context.provisional_result = IterationResult(
+                status=IterationResultStatus.FAILURE,
+                message="No project was provided.",
+            )
+            self.context.transition_to(IterationStateError())
+            return
+        if self.context.current_date is None:
+            self.context.provisional_result = IterationResult(
+                status=IterationResultStatus.FAILURE,
+                message="No current date was provided.",
+            )
+            self.context.transition_to(IterationStateError())
+            return
+        self.context.person_days_remaining = self.context.person_days_remaining or 0
         # The person days remaining are the number of person days left from the
         # estimated person days for the project after we've subtracted off all
         # the whole weeks. Remainder days is the remainder of the probablistic
@@ -258,6 +272,21 @@ class IterationStateFinalizing(IterationBaseState):
     async def handle_process(self) -> None:
         """Finalize the iteration."""
 
+        if self.context.project is None:
+            self.context.provisional_result = IterationResult(
+                status=IterationResultStatus.FAILURE,
+                message="No project was provided.",
+            )
+            self.context.transition_to(IterationStateError())
+            return
+        if self.context.current_date is None:
+            self.context.provisional_result = IterationResult(
+                status=IterationResultStatus.FAILURE,
+                message="No current date was provided.",
+            )
+            self.context.transition_to(IterationStateError())
+            return
+
         if (
             self.context.current_date.weekday()
             not in self.context.project.weekly_work_days
@@ -266,7 +295,11 @@ class IterationStateFinalizing(IterationBaseState):
             self.context.current_date += datetime.timedelta(days=1)
             return
 
-        self.context.attributes = {"end_date": self.context.current_date}
+        self.context.provisional_result = IterationResult(
+            status=IterationResultStatus.SUCCESS,
+            message="No project was provided.",
+            attributes={"end_date": self.context.current_date},
+        )
 
         self.context.transition_to(IterationStateSuccessful())
 
@@ -344,8 +377,10 @@ class IterationStateSuccessful(IterationBaseState):
 
     async def handle_process(self) -> None:
         logger.debug("Iteration was successful.")
-        self.context.result = IterationResult(
-            status=IterationResultStatus.SUCCESS,
-            message="Iteration completed successfully.",
-            attributes=self.context.attributes,
+        self.context.result = self.context.provisional_result or IterationResult(
+            status=IterationResultStatus.FAILURE,
+            message=(
+                "Iteration succeeded without a result. This should NEVER HAPPEN. "
+                "Someone should fix this."
+            ),
         )
