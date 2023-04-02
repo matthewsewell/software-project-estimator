@@ -153,5 +153,5 @@ class TestProject(unittest.TestCase):
                 date(2020, 1, 8),
                 date(2020, 1, 9),
                 date(2020, 1, 10),
-            ]
+            ],
         )
