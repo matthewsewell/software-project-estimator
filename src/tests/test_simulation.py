@@ -4,9 +4,12 @@ from datetime import date
 from unittest import mock
 
 from software_project_estimator.project import WEEKS_IN_A_YEAR, Project
-from software_project_estimator.simulation.monte_carlo import (
-    MonteCarlo, MonteCarloOutcome)
 from software_project_estimator.task import Task, TaskGroup
+
+from software_project_estimator.simulation.monte_carlo import (  # isort: skip
+    MonteCarlo,
+    MonteCarloOutcome,
+)
 
 from software_project_estimator.simulation.iteration import (  # isort: skip
     Iteration,

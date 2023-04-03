@@ -7,8 +7,12 @@ from typing import Optional
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from software_project_estimator import Project
-from software_project_estimator.simulation.iteration import (
-    Iteration, IterationResult, IterationResultStatus)
+
+from software_project_estimator.simulation.iteration import (  # isort: skip
+    Iteration,
+    IterationResult,
+    IterationResultStatus,
+)
 
 
 class MonteCarloOutcome(BaseModel):  # pylint: disable=too-few-public-methods
