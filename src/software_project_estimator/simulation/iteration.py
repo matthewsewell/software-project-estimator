@@ -50,11 +50,11 @@ class Iteration:
         """Return the result of the iteration."""
         return self.context.result
 
-    async def run(self) -> None:
+    def run(self) -> None:
         """Run the iteration."""
         self.context.transition_to(IterationStateUninitialized())
         while self.context.result is None:
-            await self.context.process()
+            self.context.process()
 
 
 class IterationContext:
@@ -63,7 +63,6 @@ class IterationContext:
     """
 
     project: Optional[Project] = None
-    attributes: dict = {}
     person_days_remaining: Optional[float] = None
     remainder_days: float = 0.0
     working_days_left: Optional[float] = None
@@ -86,11 +85,11 @@ class IterationContext:
         self._state = state
         self._state.context = self
 
-    async def process(self):
+    def process(self):
         """
         The Context delegates part of its behavior to the current State object.
         """
-        await self._state.handle_process()
+        self._state.handle_process()
 
     def probabilistic_weekly_person_days_lost_to_vacations(self) -> int:
         """
@@ -108,8 +107,8 @@ class IterationContext:
 
     def probabilistic_estimated_project_person_days(self) -> float:
         """
-        Returns a probabilistic number of estimated project person days. This is
-        based on the probability distribution of the project's tasks and is
+        Returns a probabilistic number of estimated project person days. This
+        is based on the probability distribution of the project's tasks and is
         useful in aggregating the results of multiple simulations.
         """
         days = 0.0
@@ -144,7 +143,7 @@ class IterationBaseState(ABC):
         self._context = context
 
     @abstractmethod
-    async def handle_process(self) -> None:
+    def handle_process(self) -> None:
         """Just a gentle reminder to set this method on every state."""
         raise NotImplementedError
 
@@ -155,7 +154,7 @@ class IterationStateCalculatingWeeks(IterationBaseState):
     iteration.
     """
 
-    async def handle_process(self) -> None:
+    def handle_process(self) -> None:
         """Calculate the number of whole weeks in the iteration."""
 
         if self.context.project is None:
@@ -207,7 +206,7 @@ class IterationStateCalculatingDays(IterationBaseState):
     iteration.
     """
 
-    async def handle_process(self) -> None:
+    def handle_process(self) -> None:
         """
         Calculate the number of days in the iteration once the weeks have been
         calculated.
@@ -269,7 +268,7 @@ class IterationStateFinalizing(IterationBaseState):
     This state is responsible for finalizing the iteration.
     """
 
-    async def handle_process(self) -> None:
+    def handle_process(self) -> None:
         """Finalize the iteration."""
 
         if self.context.project is None:
@@ -297,8 +296,11 @@ class IterationStateFinalizing(IterationBaseState):
 
         self.context.provisional_result = IterationResult(
             status=IterationResultStatus.SUCCESS,
-            message="No project was provided.",
-            attributes={"end_date": self.context.current_date},
+            message="Process completed.",
+            attributes={
+                "start_date": self.context.current_date,
+                "end_date": self.context.current_date,
+            },
         )
 
         self.context.transition_to(IterationStateSuccessful())
@@ -309,13 +311,13 @@ class IterationStateUninitialized(IterationBaseState):
     The Uninitialized state is the initial state of the iteration.
     """
 
-    async def has_valid_project(self) -> bool:
+    def has_valid_project(self) -> bool:
         """Check if the project is valid."""
         if not self.context.project or not isinstance(self.context.project, Project):
             return False
         return True
 
-    async def has_tasks_or_task_groups(self) -> bool:
+    def has_tasks_or_task_groups(self) -> bool:
         """Check if the project has tasks or task groups."""
         if all(
             [
@@ -326,10 +328,10 @@ class IterationStateUninitialized(IterationBaseState):
             return False
         return True
 
-    async def handle_process(self) -> None:
+    def handle_process(self) -> None:
         """This is where we initialize the iteration."""
         logger.debug("Iteration is initializing.")
-        if not await self.has_valid_project():
+        if not self.has_valid_project():
             self.context.provisional_result = IterationResult(
                 status=IterationResultStatus.FAILURE,
                 message="No project was provided.",
@@ -337,7 +339,7 @@ class IterationStateUninitialized(IterationBaseState):
             self.context.transition_to(IterationStateError())
             return
 
-        if not await self.has_tasks_or_task_groups():
+        if not self.has_tasks_or_task_groups():
             self.context.provisional_result = IterationResult(
                 status=IterationResultStatus.FAILURE,
                 message="No tasks were present in the project.",
@@ -348,8 +350,6 @@ class IterationStateUninitialized(IterationBaseState):
         # Set all initial values. We can ignore the type here because we can't
         # get to this section of code without a project.
         self.context.current_date = self.context.project.start_date  # type: ignore
-        self.context.attributes["start_date"] = self.context.current_date
-        self.context.attributes["end_date"] = None
         self.context.person_days_remaining = (  # type: ignore
             self.context.probabilistic_estimated_project_person_days()
         )
@@ -362,7 +362,7 @@ class IterationStateError(IterationBaseState):
     The Error state is the state of the iteration when an error has occurred
     """
 
-    async def handle_process(self) -> None:
+    def handle_process(self) -> None:
         logger.debug("Iteration has encountered an error.")
         self.context.result = self.context.provisional_result or IterationResult(
             status=IterationResultStatus.FAILURE,
@@ -375,7 +375,7 @@ class IterationStateSuccessful(IterationBaseState):
     The Successful state is the final state of the iteration.
     """
 
-    async def handle_process(self) -> None:
+    def handle_process(self) -> None:
         logger.debug("Iteration was successful.")
         self.context.result = self.context.provisional_result or IterationResult(
             status=IterationResultStatus.FAILURE,

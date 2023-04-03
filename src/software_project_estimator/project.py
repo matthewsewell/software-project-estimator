@@ -69,8 +69,6 @@ class Project(BaseModel):
         default=[],
         description="The task groups in the project",
     )
-    distribution: dict = {}
-    endings: dict = {}
     _work_holidays: dict = {}
 
     @property
