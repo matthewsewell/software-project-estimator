@@ -299,7 +299,7 @@ class IterationStateFinalizing(IterationBaseState):
             message="Process completed.",
             attributes={
                 "start_date": self.context.current_date,
-                "end_date": self.context.current_date
+                "end_date": self.context.current_date,
             },
         )
 

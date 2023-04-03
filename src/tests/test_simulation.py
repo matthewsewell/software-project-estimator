@@ -13,8 +13,11 @@ from software_project_estimator.task import Task, TaskGroup
 from software_project_estimator.simulation.iteration import (  # isort: skip
     Iteration,
     IterationBaseState,
+    IterationResultStatus,
+    IterationStateCalculatingDays,
     IterationStateCalculatingWeeks,
     IterationStateError,
+    IterationStateFinalizing,
 )
 
 
@@ -152,6 +155,48 @@ class TestIteration(unittest.TestCase):
         """Ensure that we can't calculate weeks without a project."""
         iteration = Iteration(project=None)
         iteration.context.transition_to(IterationStateCalculatingWeeks())
+        iteration.context.process()
+        self.assertIsInstance(
+            iteration.context._state,  # pylint: disable=protected-access
+            IterationStateError,
+        )
+
+    def test_calculating_days_without_project(self):
+        """Ensure that we can't calculate days without a project."""
+        iteration = Iteration(project=None)
+        iteration.context.transition_to(IterationStateCalculatingDays())
+        iteration.context.process()
+        self.assertIsInstance(
+            iteration.context._state,  # pylint: disable=protected-access
+            IterationStateError,
+        )
+
+    def test_calculating_days_without_current_data(self):
+        """Ensure that we can't calculate days without a current date."""
+        iteration = Iteration(project=Project(name="Test", developer_count=1))
+        iteration.context.current_date = None
+        iteration.context.transition_to(IterationStateFinalizing())
+        iteration.context.process()
+        self.assertIsInstance(
+            iteration.context._state,  # pylint: disable=protected-access
+            IterationStateError,
+        )
+
+    def test_finalizing_without_project(self):
+        """Ensure that we can't finalize without a project."""
+        iteration = Iteration(project=None)
+        iteration.context.transition_to(IterationStateFinalizing())
+        iteration.context.process()
+        self.assertIsInstance(
+            iteration.context._state,  # pylint: disable=protected-access
+            IterationStateError,
+        )
+
+    def test_finalizing_without_current_data(self):
+        """Ensure that we can't finalize without a current date."""
+        iteration = Iteration(project=Project(name="Test", developer_count=1))
+        iteration.context.current_date = None
+        iteration.context.transition_to(IterationStateCalculatingDays())
         iteration.context.process()
         self.assertIsInstance(
             iteration.context._state,  # pylint: disable=protected-access
@@ -297,7 +342,7 @@ class TestIteration(unittest.TestCase):
         project.weeks_off_per_year = 0
 
         project.tasks = [
-            Task(name="Test", optimistic=5, pessimistic=12, likely=10),
+            Task(name="Test", optimistic=5, pessimistic=16, likely=12),
         ]
 
         monte = MonteCarlo(project, 1_000)
@@ -313,3 +358,20 @@ class TestIteration(unittest.TestCase):
             self.assertIsInstance(result, MonteCarloOutcome)
         self.assertEqual(totals["count"], 1_000)
         self.assertAlmostEqual(totals["percentage"], 1.0)
+
+    def test_monte_carlo_run_iteration(self):
+        """
+        Ensure that we can run a single iteration from a Monte Carlo simulation.
+        """
+        project = Project(name="Test")
+        project.developer_count = 1
+        project.start_date = date(2020, 1, 1)
+        project.weeks_off_per_year = 0
+
+        project.tasks = [
+            Task(name="Test", optimistic=5, pessimistic=16, likely=12),
+        ]
+
+        monte = MonteCarlo(project, 0)
+        result = monte._run_iteration(0)  # pylint: disable=protected-access
+        self.assertEqual(result.status, IterationResultStatus.SUCCESS)
