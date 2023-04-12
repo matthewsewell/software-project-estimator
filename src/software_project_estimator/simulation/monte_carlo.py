@@ -7,11 +7,11 @@ from typing import Optional
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from software_project_estimator import Project
+from software_project_estimator.simulation.models import IterationResultStatus
 
 from software_project_estimator.simulation.iteration import (  # isort: skip
     Iteration,
     IterationResult,
-    IterationResultStatus,
 )
 
 
