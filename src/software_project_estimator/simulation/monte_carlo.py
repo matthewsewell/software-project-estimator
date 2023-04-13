@@ -62,9 +62,11 @@ class MonteCarlo:  # pylint: disable=too-few-public-methods
                     data[end_date] += 1
 
         outcomes: dict = {}
+        cumulative_count = 0
         for end_date, count in sorted(data.items()):
+            cumulative_count += count
             outcomes[end_date] = MonteCarloOutcome(
-                total=count, probability=count / self.iterations
+                total=count, probability=cumulative_count / self.iterations
             )
 
         return outcomes
