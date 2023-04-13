@@ -339,6 +339,10 @@ class TestIteration(unittest.TestCase):
         self.assertIsNotNone(iteration.result.attributes.get("end_date"))
         self.assertEqual(iteration.result.attributes.get("end_date"), expected_end_date)
 
+
+class TestMonteCarlo(unittest.TestCase):
+    """Test the Monte Carlo simulation."""
+
     def test_monte_carlo(self):
         """Ensure that we can run a Monte Carlo simulation."""
         project = Project(name="Test")
@@ -356,13 +360,33 @@ class TestIteration(unittest.TestCase):
         self.assertTrue(len(results))  # We should have some results.
         # MLK day should not be one of them
         self.assertIsNone(results.get(date(2020, 1, 20)))
-        totals = {"count": 0, "percentage": 0.0}
+        count = 0
         for result in results.values():
-            totals["count"] += result.total
-            totals["percentage"] += result.probability
+            count += result.total
             self.assertIsInstance(result, MonteCarloOutcome)
-        self.assertEqual(totals["count"], 1_000)
-        self.assertAlmostEqual(totals["percentage"], 1.0)
+        self.assertEqual(count, 1_000)
+
+    def test_monte_carlo_cumulative_probabilities(self):
+        """
+        Ensure that the Monte Carlo simulation runs multiple outocmes with
+        increasing cumulative probabilities eventually finishing at 100%.
+        """
+        project = Project(name="Test")
+        project.developer_count = 1
+        project.start_date = date(2020, 1, 1)
+        project.weeks_off_per_year = 0
+
+        project.tasks = [
+            Task(name="Test", optimistic=5, pessimistic=16, likely=12),
+        ]
+
+        monte = MonteCarlo(project, 100)
+        results = monte.run()
+        cumulative_probability = 0.0
+        for result in results.values():
+            self.assertGreater(result.probability, cumulative_probability)
+            cumulative_probability = result.probability
+        self.assertAlmostEqual(cumulative_probability, 1.0)
 
     def test_monte_carlo_run_iteration(self):
         """
@@ -379,4 +403,4 @@ class TestIteration(unittest.TestCase):
 
         monte = MonteCarlo(project, 0)
         result = monte._run_iteration(0)  # pylint: disable=protected-access
-        self.assertEqual(result.status, IterationResultStatus.SUCCESS)
+        self.assertAlmostEqual(result.status, IterationResultStatus.SUCCESS)
