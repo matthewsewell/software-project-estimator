@@ -339,6 +339,10 @@ class TestIteration(unittest.TestCase):
         self.assertIsNotNone(iteration.result.attributes.get("end_date"))
         self.assertEqual(iteration.result.attributes.get("end_date"), expected_end_date)
 
+
+class TestMonteCarlo(unittest.TestCase):
+    """Test the Monte Carlo simulation."""
+
     def test_monte_carlo(self):
         """Ensure that we can run a Monte Carlo simulation."""
         project = Project(name="Test")
