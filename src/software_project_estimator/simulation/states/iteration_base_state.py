@@ -4,8 +4,9 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from software_project_estimator.simulation.iteration import \
-        IterationContext
+    from software_project_estimator.simulation.iteration import (  # isort: skip
+        IterationContext,
+    )
 
 
 class IterationBaseState(ABC):

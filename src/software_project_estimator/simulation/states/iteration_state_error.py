@@ -3,8 +3,11 @@
 import logging
 
 from software_project_estimator.simulation import states
-from software_project_estimator.simulation.models import (
-    IterationResult, IterationResultStatus)
+
+from software_project_estimator.simulation.models import (  # isort: skip
+    IterationResult,
+    IterationResultStatus,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -12,8 +12,11 @@ import numpy
 
 from software_project_estimator import Project
 from software_project_estimator.simulation.models import IterationResult
-from software_project_estimator.simulation.states import (
-    IterationBaseState, IterationStateUninitialized)
+
+from software_project_estimator.simulation.states import (  # isort: skip
+    IterationBaseState,
+    IterationStateUninitialized,
+)
 
 logger = logging.getLogger(__name__)
 
