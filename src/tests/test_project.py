@@ -5,7 +5,7 @@ from datetime import date
 from software_project_estimator.project import Project
 
 
-class TestProject(unittest.TestCase):
+class TestProject(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """Unit tests for the Project class."""
 
     def test_project(self):
@@ -127,6 +127,13 @@ class TestProject(unittest.TestCase):
             project.person_days_lost_to_holidays_this_week(date(2023, 12, 22)), 5
         )
 
+    def test_person_days_not_lost_to_holidays_this_week(self):
+        """This is the same as the test above but with holidays turned off"""
+        project = Project(name="Test", developer_count=5, country_code=None)
+        self.assertEqual(
+            project.person_days_lost_to_holidays_this_week(date(2023, 12, 23)), 0
+        )
+
     def test_person_days_lost_to_holidays_this_week_with_none_date(self):
         """Test the person_days_lost_to_holidays_this_week method."""
         project = Project(name="Test", developer_count=5)
@@ -155,3 +162,10 @@ class TestProject(unittest.TestCase):
                 date(2020, 1, 10),
             ],
         )
+
+    def test_failure_on_stupid_country_code(self):
+        """Test that the country code must be a valid ISO 3166-1 alpha-2 code."""
+        project = Project(name="Test", country_code="UK")
+        with self.assertRaises(ValueError):
+            project.country_code = "XX"
+            project.is_holiday(date(2023, 12, 25))
