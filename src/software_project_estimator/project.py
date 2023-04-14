@@ -33,6 +33,10 @@ class Project(BaseModel):
         default=1,
         description="The number of developers working on the project",
     )
+    country_code: Optional[str] = Field(
+        default="US",
+        description="The 2-digit country code for the holiday schedule",
+    )
     weeks_off_per_year: float = Field(
         default=2.0,  # 2 weeks off per year
         description="The number of weeks off per year the average developer gets",
@@ -103,10 +107,19 @@ class Project(BaseModel):
 
     def is_holiday(self, this_date: date) -> bool:
         """Returns True if this_date is a holiday."""
+        if self.country_code is None:
+            return False
         try:
             holidays_this_year = self._work_holidays[this_date.year]
         except KeyError:
-            holidays_this_year = holidays.UnitedStates(years=[this_date.year])
+            try:
+                holidays_this_year = holidays.country_holidays(
+                    self.country_code, years=[this_date.year]
+                )
+            except NotImplementedError as err:
+                raise ValueError(
+                    f"Unsupported country code: {self.country_code}"
+                ) from err
             self._work_holidays[this_date.year] = holidays_this_year
         return this_date in holidays_this_year
 
