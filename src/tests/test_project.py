@@ -5,7 +5,7 @@ from datetime import date
 from software_project_estimator.project import Project
 
 
-class TestProject(unittest.TestCase):
+class TestProject(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """Unit tests for the Project class."""
 
     def test_project(self):
