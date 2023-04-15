@@ -19,9 +19,11 @@ class TestProjectParameterValidations(unittest.TestCase):
             Project(name="Test", developer_count=0)
 
     def test_weeks_off_per_year_sanity(self):
-        """Test that the weeks off per year is a positive number less than 52."""
+        """
+        Test that the weeks off per year is 0 or a positive number less than 52.
+        """
         with self.assertRaises(ValueError):
-            Project(name="Test", weeks_off_per_year=0)
+            Project(name="Test", weeks_off_per_year=-1)
         with self.assertRaises(ValueError):
             Project(name="Test", weeks_off_per_year=52)
         project = Project(name="Test", weeks_off_per_year=20.2)
@@ -53,10 +55,11 @@ class TestProjectParameterValidations(unittest.TestCase):
 
     def test_comunication_penalty_sanity(self):
         """
-        Test that the communication penalty is a positive number less than 10.
+        Test that the communication penalty is 0 or a positive number
+        less than 10.
         """
         with self.assertRaises(ValueError):
-            Project(name="Test", communication_penalty=0)
+            Project(name="Test", communication_penalty=-1)
         with self.assertRaises(ValueError):
             Project(name="Test", communication_penalty=10)
         project = Project(name="Test", communication_penalty=5.5)

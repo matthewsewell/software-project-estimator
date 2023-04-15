@@ -12,7 +12,6 @@ import holidays
 from pydantic import (  # pylint: disable=no-name-in-module # isort: skip
     BaseModel,
     Field,
-    ValidationError,
     validator,
 )
 
@@ -30,6 +29,12 @@ class Project(BaseModel):
     that can be read. It also contains a number of methods that can be called
     to perform various calculations.
     """
+
+    class Config:  # pylint: disable=too-few-public-methods
+        """This class configures the project data model."""
+
+        # This ensures that the validators are run when the model is updated
+        validate_assignment = True
 
     name: str = Field(description="The name of the project")
     start_date: date = Field(
@@ -89,7 +94,7 @@ class Project(BaseModel):
     ) -> int:
         """Validate the developer count."""
         if value < 1:
-            raise ValidationError("The developer count must be greater than 0")
+            raise ValueError("The developer count must be greater than 0")
         return value
 
     @validator("weeks_off_per_year")
@@ -100,10 +105,10 @@ class Project(BaseModel):
         Validate the weeks off per year. They need to be positive and less
         than 52.
         """
-        if value < 1:
-            raise ValueError("The weeks off per year must be greater than 0")
+        if value < 0:
+            raise ValueError("The weeks off per year must be 0 or greater")
         if value >= WEEKS_IN_A_YEAR:
-            raise ValidationError(
+            raise ValueError(
                 "The weeks off per year must be less than 52 weeks per year"
             )
         return value
@@ -119,7 +124,7 @@ class Project(BaseModel):
         if not value:
             raise ValueError("The weekly work days must be a non-empty list")
         if any(day not in range(DAYS_IN_A_WEEK) for day in value):
-            raise ValidationError(
+            raise ValueError(
                 "The weekly work days must be a list of integers between 0 and 6"
             )
         return value
@@ -133,9 +138,9 @@ class Project(BaseModel):
         than 16.
         """
         if value < 1:
-            raise ValidationError("The work hours per day must be greater than 0")
+            raise ValueError("The work hours per day must be greater than 0")
         if value >= 16:
-            raise ValidationError("The work hours per day must be less than 16")
+            raise ValueError("The work hours per day must be less than 16")
         return value
 
     @validator("communication_penalty")
@@ -146,10 +151,10 @@ class Project(BaseModel):
         Validate the communication penalty. It needs to be positive and less
         than 10.
         """
-        if value < 1:
-            raise ValidationError("The communication penalty must be greater than 0")
+        if value < 0:
+            raise ValueError("The communication penalty must be greater than 0")
         if value >= 10:  # 10 hours is a lot of communication
-            raise ValidationError("The communication penalty must be less than 10")
+            raise ValueError("The communication penalty must be less than 10")
         return value
 
     @property
