@@ -5,6 +5,64 @@ from datetime import date
 from software_project_estimator.project import Project
 
 
+class TestProjectParameterValidations(unittest.TestCase):
+    """Unit tests for the Project class parameter validations."""
+
+    def test_name(self):
+        """Test that the name is required."""
+        with self.assertRaises(ValueError):
+            Project()
+
+    def test_developer_count_sanity(self):
+        """Test that the developer count is a positive number."""
+        with self.assertRaises(ValueError):
+            Project(name="Test", developer_count=0)
+
+    def test_weeks_off_per_year_sanity(self):
+        """Test that the weeks off per year is a positive number less than 52."""
+        with self.assertRaises(ValueError):
+            Project(name="Test", weeks_off_per_year=0)
+        with self.assertRaises(ValueError):
+            Project(name="Test", weeks_off_per_year=52)
+        project = Project(name="Test", weeks_off_per_year=20.2)
+        self.assertEqual(project.weeks_off_per_year, 20.2)
+
+    def test_weekly_work_days_per_week_sanity(self):
+        """
+        Test that the weekly work days is a list of at least one integer
+        between 0 and 6.
+        """
+        with self.assertRaises(ValueError):
+            Project(name="Test", weekly_work_days=[])
+        with self.assertRaises(ValueError):
+            Project(name="Test", weekly_work_days=[-1])
+        with self.assertRaises(ValueError):
+            Project(name="Test", weekly_work_days=[7])
+
+    def test_work_hours_per_day_sanity(self):
+        """
+        Test that the work hours per day is a positive number less than 16.
+        Even developers need to sleep sometimes.
+        """
+        with self.assertRaises(ValueError):
+            Project(name="Test", work_hours_per_day=0)
+        with self.assertRaises(ValueError):
+            Project(name="Test", work_hours_per_day=16)
+        project = Project(name="Test", work_hours_per_day=8.5)
+        self.assertEqual(project.work_hours_per_day, 8.5)
+
+    def test_comunication_penalty_sanity(self):
+        """
+        Test that the communication penalty is a positive number less than 10.
+        """
+        with self.assertRaises(ValueError):
+            Project(name="Test", communication_penalty=0)
+        with self.assertRaises(ValueError):
+            Project(name="Test", communication_penalty=10)
+        project = Project(name="Test", communication_penalty=5.5)
+        self.assertEqual(project.communication_penalty, 5.5)
+
+
 class TestProject(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """Unit tests for the Project class."""
 
@@ -12,11 +70,6 @@ class TestProject(unittest.TestCase):  # pylint: disable=too-many-public-methods
         """Test the Project happy path."""
         project = Project(name="Test")
         self.assertEqual(project.name, "Test")
-
-    def test_required_fields(self):
-        """Test the required_fields property."""
-        with self.assertRaises(ValueError):
-            Project()
 
     def test_default_date(self):
         """Test that the date is created with the current date."""

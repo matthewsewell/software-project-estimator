@@ -8,9 +8,16 @@ from datetime import date, timedelta
 from typing import List, Optional
 
 import holidays
-from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
-from software_project_estimator.task import Task, TaskGroup
+from pydantic import (  # pylint: disable=no-name-in-module # isort: skip
+    BaseModel,
+    Field,
+    ValidationError,
+    validator,
+)
+
+from software_project_estimator.task import Task, TaskGroup  # isort: skip
+
 
 DAYS_IN_A_WEEK = 7
 WEEKS_IN_A_YEAR = 52
@@ -62,7 +69,8 @@ class Project(BaseModel):
         default=0.5,
         description=(
             "The communication penalty. This is the average amount of time "
-            "per week that a developer has to communicate with another developer "
+            "(in hours) per week that a developer has to communicate with "
+            "another developer."
         ),
     )
     tasks: List[Task] = Field(
@@ -74,6 +82,75 @@ class Project(BaseModel):
         description="The task groups in the project",
     )
     _work_holidays: dict = {}
+
+    @validator("developer_count")
+    def _validate_developer_count(  # pylint: disable=no-self-argument
+        cls, value: int
+    ) -> int:
+        """Validate the developer count."""
+        if value < 1:
+            raise ValidationError("The developer count must be greater than 0")
+        return value
+
+    @validator("weeks_off_per_year")
+    def _validate_weeks_off_per_year(  # pylint: disable=no-self-argument
+        cls, value: float
+    ) -> float:
+        """
+        Validate the weeks off per year. They need to be positive and less
+        than 52.
+        """
+        if value < 1:
+            raise ValueError("The weeks off per year must be greater than 0")
+        if value >= WEEKS_IN_A_YEAR:
+            raise ValidationError(
+                "The weeks off per year must be less than 52 weeks per year"
+            )
+        return value
+
+    @validator("weekly_work_days")
+    def _validate_weekly_work_days(  # pylint: disable=no-self-argument
+        cls, value: List[int]
+    ) -> List[int]:
+        """
+        Validate that the weekly work days is a list of at least one integer
+        between 0 and 6.
+        """
+        if not value:
+            raise ValueError("The weekly work days must be a non-empty list")
+        if any(day not in range(DAYS_IN_A_WEEK) for day in value):
+            raise ValidationError(
+                "The weekly work days must be a list of integers between 0 and 6"
+            )
+        return value
+
+    @validator("work_hours_per_day")
+    def _validate_work_hours_per_day(  # pylint: disable=no-self-argument
+        cls, value: float
+    ) -> float:
+        """
+        Validate the work hours per day. They need to be more than 1 and less
+        than 16.
+        """
+        if value < 1:
+            raise ValidationError("The work hours per day must be greater than 0")
+        if value >= 16:
+            raise ValidationError("The work hours per day must be less than 16")
+        return value
+
+    @validator("communication_penalty")
+    def _validate_communication_penalty(  # pylint: disable=no-self-argument
+        cls, value: float
+    ) -> float:
+        """
+        Validate the communication penalty. It needs to be positive and less
+        than 10.
+        """
+        if value < 1:
+            raise ValidationError("The communication penalty must be greater than 0")
+        if value >= 10:  # 10 hours is a lot of communication
+            raise ValidationError("The communication penalty must be less than 10")
+        return value
 
     @property
     def work_days_per_week(self) -> int:
