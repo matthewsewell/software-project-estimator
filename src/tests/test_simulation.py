@@ -404,3 +404,23 @@ class TestMonteCarlo(unittest.TestCase):
         monte = MonteCarlo(project, 0)
         result = monte._run_iteration(0)  # pylint: disable=protected-access
         self.assertAlmostEqual(result.status, IterationResultStatus.SUCCESS)
+
+    def test_monte_carlo_preflight(self):
+        """
+        Ensure that we can run a Monte Carlo simulation with a preflight check.
+        """
+        project = Project(name="Test")
+
+        # Set up a preflight that will always fail because the maximum weekly
+        # hours is 0
+        project.developer_count = 2
+        project.weekly_work_days = [0]
+        project.work_hours_per_day = 1
+        project.communication_penalty = 1
+
+        project.tasks = [
+            Task(name="Test", optimistic=5, pessimistic=16, likely=12),
+        ]
+
+        with self.assertRaises(RuntimeError):
+            MonteCarlo(project, 1_000).run()

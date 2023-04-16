@@ -22,7 +22,7 @@ DAYS_IN_A_WEEK = 7
 WEEKS_IN_A_YEAR = 52
 
 
-class Project(BaseModel):
+class Project(BaseModel):  # pylint: disable=too-many-instance-attributes
     """
     A software project. This is the main data model for the package. It
     contains a number of parameters that can be set and a number of properties
@@ -138,7 +138,7 @@ class Project(BaseModel):
         than 16.
         """
         if value < 1:
-            raise ValueError("The work hours per day must be greater than 0")
+            raise ValueError("The work hours per day must be one or more")
         if value >= 16:
             raise ValueError("The work hours per day must be less than 16")
         return value

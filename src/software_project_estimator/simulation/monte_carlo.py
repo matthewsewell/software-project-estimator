@@ -37,6 +37,12 @@ class MonteCarlo:  # pylint: disable=too-few-public-methods
         Run the monte carlo simulation using multiprocessing. Return a
         dictionary of the results.
         """
+        if self.project and self.project.max_person_days_per_week <= 0:
+            raise RuntimeError(
+                "The max person days per week must be greater than 0 or the "
+                "simulation will never end. This is definately not what you "
+                "want!"
+            )
         with multiprocessing.Pool() as pool:
             results = pool.map(self._run_iteration, range(self.iterations))
         return self._process_results(results)
