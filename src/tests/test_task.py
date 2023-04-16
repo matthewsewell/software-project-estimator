@@ -41,6 +41,33 @@ class TestTask(unittest.TestCase):
         task = Task(name="Test", optimistic=3, pessimistic=10, likely=5)
         self.assertAlmostEqual(task.variance, 1.0801, places=4)
 
+    def test_optimistic_is_positive_number_or_zero(self):
+        """Test that the optimistic property is a positive number or 0."""
+        task = Task(name="Test", optimistic=0, pessimistic=3, likely=2)
+        self.assertEqual(task.optimistic, 0)
+        with self.assertRaises(ValueError):
+            Task(name="Test", optimistic=-1, pessimistic=3, likely=2)
+
+    def test_likely_is_equal_to_or_greater_than_optimistic(self):
+        """
+        Test that the likely property is equal to or greater than
+        optimistic.
+        """
+        task = Task(name="Test", optimistic=1, pessimistic=3, likely=2)
+        self.assertEqual(task.likely, 2)
+        with self.assertRaises(ValueError):
+            Task(name="Test", optimistic=1, pessimistic=3, likely=0)
+
+    def test_pessimistic_is_equal_to_or_greater_than_likely(self):
+        """
+        Test that the pessimistic property is equal to or greater than
+        likely.
+        """
+        task = Task(name="Test", optimistic=1, pessimistic=3, likely=2)
+        self.assertEqual(task.pessimistic, 3)
+        with self.assertRaises(ValueError):
+            Task(name="Test", optimistic=1, pessimistic=2, likely=3)
+
 
 class TestTaskGroup(unittest.TestCase):
     """Test the TaskGroup class."""
@@ -76,7 +103,7 @@ class TestTaskGroup(unittest.TestCase):
     def test_add_task(self):
         """Test the add_task method."""
         task_group = TaskGroup(name="Test")
-        task = Task(name="Test", optimistic=1, pessimistic=2, likely=3)
+        task = Task(name="Test", optimistic=1, pessimistic=5, likely=3)
         added = task_group.add_task(task)
         self.assertTrue(added)
         self.assertEqual(task_group.tasks, [task])

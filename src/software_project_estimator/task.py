@@ -6,7 +6,11 @@ import math
 from typing import List
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
+from pydantic import (  # pylint: disable=no-name-in-module # isort: skip
+    BaseModel,
+    Field,
+    root_validator,
+)
 
 
 class TaskGroup(BaseModel):
@@ -51,6 +55,30 @@ class Task(BaseModel):
     optimistic: float  # Optimistic estimate in person days
     pessimistic: float  # Pessimistic estimate in person days
     likely: float  # Most likely estimate in person days
+
+    @root_validator(pre=True)
+    def ensure_estimates_are_sane(
+        cls, values: dict
+    ):  # pylint: disable=no-self-argument
+        """Ensure that the estimates are sane"""
+        try:
+            optimistic = values["optimistic"]
+            likely = values["likely"]
+            pessimistic = values["pessimistic"]
+        except KeyError:
+            # We'll get here if a previous validator has already raised an error
+            return values
+        if optimistic < 0:
+            raise ValueError("Optimistic estimate must be zero or more")
+        if likely < optimistic:
+            raise ValueError(
+                "Likely estimate must be equal to or greater than the optimistic estimate"
+            )
+        if pessimistic < likely:
+            raise ValueError(
+                "Pessimistic estimate must be equal to or greater than the likely estimate"
+            )
+        return values
 
     @property
     def average(self) -> float:
