@@ -1,4 +1,4 @@
-"""Unit tests for the Task class."""
+"""Unit tests for the Simulator."""
 import unittest
 from datetime import date
 from unittest import mock
