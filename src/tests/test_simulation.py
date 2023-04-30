@@ -17,7 +17,6 @@ from software_project_estimator.simulation.monte_carlo import (  # isort: skip
     MonteCarloOutcome,
 )
 
-
 from software_project_estimator.simulation.states import (  # isort: skip
     IterationStateCalculatingDays,
     IterationStateCalculatingWeeks,
