@@ -90,7 +90,7 @@ for day, result in results.items():
  Looking at the calendar, out project started on 1/1/2023, which was a Sunday.
  Also, New Year's day was observed in the US on 1/2. The first day we can
  actually work is 1/3. MLK Day was observed on 1/16, so that's also a day we
- don't work in the US. The 15.33 days we're actually working are 1/3/, 1/4, 1/5,
+ don't work in the US. The 15.33 days we're actually working are 1/3, 1/4, 1/5,
  1/6, 1/9, 1/10, 1/11, 1/12, 1/13, 1/17, 1/18, 1/19, 1/20, 1/23, 1/24, and 1/25.
  That means that, at around the 50% probability, the first day we don't work on
  this project is 1/26.
