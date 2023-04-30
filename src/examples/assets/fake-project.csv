@@ -1,0 +1,85 @@
+Description,Optimistic,Pessimistic,Most likely
+Add Feature One handling to bulk uploader,0.07,0.29,0.15
+Add Feature Two handling to bulk uploader,0.07,0.29,0.15
+Add Feature Three handling to bulk uploader,0.07,0.29,0.15
+Add file type and size restrictions for multifile uploader,0.07,0.5,0.15
+Add file vulnerability scanning,1,5,3
+Identify and address file upload vulnerabilities,0.5,0.7,0.5
+Add new search/browse file module,2,5,3
+Add ability for org level bulk uploader,1,3,1.5
+Support capturing of critical metadata for uploaded files,1.5,4,2
+Remediation,5,10,7
+Set default P&I percentage to 50% for All Fees rule,0.03,0.5,0.14
+Update details page with new fields related to associated Insurance object,0.22,0.5,0.285
+Report for asets that need insurance,1,3,2
+Asset data report for insurance company,1,3,2
+Create Feature Four bulk uploader to consume premiums/fees from insurance company,1,3,2
+Update portfolio summary and income statement reports to add insurance expense line items,3,7,5
+Excel report for insurance payments across different assets,2,4,3
+Insurance report tab,2.5,5,3.5
+Upfeed Insurance to banks GL system,3,10,6
+New expenses module with Insurance index + detail pages (includes backend support),5,10,7
+Remediation,5,10,7
+Add flag on account to opt in/out of processing,0.07,1,0.1
+Generate file to upfeed assets for tax vendor to bank (assuming on monthly cadence),2,10,7
+Upfeed assets for tax vendor to bank (assuming monthly cadence),3,11,7.5
+Create CSV uploader for ingest from tax vendor (bulk uploader),1,3,2
+Create new model/CRUD endpoints for Ad Valorem (with elasticsearch support),2.5,5,3.5
+Create expenses module + ag grid for ad valorem,3,7,5
+Create necessary forms for ad valorem object management (manual create + update),2,6,4
+Update P&I calculations to include ad valorem when depleting expenses,2,5,3
+Generate excel report to identify ad valorem payments across assets,3,10,7
+Upfeed ad-valorem to banks GL system,3,10,6
+Remediation,5,10,7
+"Create bulk user management in admin (create, update, delete)",0.5,2,1
+Create bulk account import in admin,0.5,2,1
+Remediation,5,10,7
+Implement immediate deposit for check (posted and upfed same day without matching check detail),3,10,7
+Design and document the upfeed service architecture (account for requeueing),3,5,4
+Setup terraform to provision upfeed service architecture,1,5,4
+Integrate upfeed service provisioning/updates into the deployment process,1,5,4
+Retrofit into new upfeed service,2,10,5
+Integrate with upfeed service (stubbing out integration with upfeed service in preparation for file generation integration),1,3,2
+Implement deposits generation upfeed (will require additional filtering when marking for upfeed),3,20,15
+Implement sending deposits upfeed,3,15,10
+Remediation,5,10,7
+Closed account functionality check,3,3,3
+Create a designation date that correlates to a flag for 1-90 days after account close date or after 90 days (SUSPENDED state for all incoming revenue),2,10,4
+Ability to view/designate interest ownership as inactive,0.75,3,1
+Add Feature One validations,1,5,4
+Handle major and minor account descriptions mapping to chart of accounts for an organization when necessary (per org basis),3,10,7
+Foundational work to support multi-level approvals (separate model + fk relationship),4,10,8
+Integrate approval workflow into processing (frontend + backend),4,8,6
+Separate by type in portfolio summary report,2,4,3
+Administrative reporting with filters (excel),2,7,5
+Upfeed and Callback to mark as paid,5,20,17
+Generic Upfeed,5,20,17
+Support marking as paid,3,7,5
+Remediation,5,10,7
+"Data model diagram (relationships, etc)",3,20,12
+Creating data models + relationships (multifile + action item integration),3,4,3
+Ability to create Feature Five and related data (frontend + backend),5,20,12
+Ability to update Feature Five and related data (frontend + backend) - includes deletions,3,15,7
+"Ability to view Feature Five and related data (frontend + backend, index + detail pages)",3,10,5
+Tasks can be created as action items on the details page for Feature Five (assuming as is in other places),0.5,1.5,1
+Feature Five negotiation status report,15,25,20
+Finalized LPR conversion to lease upon execution of finalized lease with appropriate attachments + relationship(s),2,5,3
+Approvals - TBD,1,15,5
+Bulk CSV imports for Feature Five + related data - TBD,1,6,2.5
+Remediation,5,10,7
+Capture AR meta-data (frontend & backend),3,15,10
+Generate detailed review report (PDF),10,20,17
+Generate condensed review report (PDF),1,10,3
+Generate annual review follow up report (Excel),2,6,4
+Generate executive report (Excel),2,6,4
+Approval workflow (MD5 checksum + electronic signature),5,20,12.5
+Remediation,5,10,7
+Allow bypassing upfeed for manual check details,0.14,1,0.5
+Allow bypassing upfeed for manual accounts,0.14,1,0.5
+Add additional columns to Statement to support netting,0.14,1,0.5
+Add way to identify parent/child relationship between netted entity and associated entity,0.5,1,0.75
+Add netting support in statement manual entry,3,8,5
+Add netting support in Check Detail manual entry,3,8,5
+Update the Statement index table,0.07,0.5,0.25
+Update the Revenue index table,0.07,0.5,0.25
+Prevent unintended posting of associated Check Detail,1,3,2
