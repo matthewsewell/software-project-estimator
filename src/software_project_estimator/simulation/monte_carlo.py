@@ -58,7 +58,7 @@ class MonteCarlo(Observable):  # pylint: disable=too-few-public-methods
 
         with multiprocessing.Pool() as pool:
             results = []
-            for _, result in enumerate(
+            for i, result in enumerate(
                 pool.imap_unordered(self._run_iteration, range(self.iterations))
             ):
                 results.append(result)
