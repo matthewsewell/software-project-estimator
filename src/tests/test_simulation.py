@@ -3,6 +3,8 @@ import unittest
 from datetime import date
 from unittest import mock
 
+from software_project_estimator.event import Event
+from software_project_estimator.observer import Observer
 from software_project_estimator.project import WEEKS_IN_A_YEAR, Project
 from software_project_estimator.simulation.models import IterationResultStatus
 from software_project_estimator.task import Task, TaskGroup
@@ -23,6 +25,18 @@ from software_project_estimator.simulation.states import (  # isort: skip
     IterationStateError,
     IterationStateFinalizing,
 )
+
+
+class MyObserver(Observer):  # pylint: disable=too-few-public-methods
+    """Observer class used for testing."""
+
+    def __init__(self):
+        self.events = []
+
+    def update(self, event: Event):
+        """Update the observer with the event."""
+        if event.tag not in ["monte_carlo_outcome_created"]:
+            self.events.append(event.data.get("number"))
 
 
 class TestIteration(unittest.TestCase):
@@ -423,3 +437,23 @@ class TestMonteCarlo(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             MonteCarlo(project, 1_000).run()
+
+    def test_monte_carlo_observation(self):
+        """
+        Ensure that we can run a Monte Carlo simulation with an observer
+        receiving events.
+        """
+        project = Project(name="Test")
+        project.start_date = date(2020, 1, 1)
+
+        project.tasks = [
+            Task(name="Test", optimistic=5, pessimistic=16, likely=12),
+        ]
+
+        monte = MonteCarlo(project, 100)
+        observer = MyObserver()
+        monte.register_observer(observer)
+        monte.run()
+
+        # 100 iterations + 100 processed + 6 informational messages
+        self.assertEqual(len(observer.events), 206)
