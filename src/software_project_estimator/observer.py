@@ -1,6 +1,7 @@
 """Abstract Base Classes for the Observer Pattern"""
 
 from abc import ABC, abstractmethod
+
 from software_project_estimator.event import Event
 
 
