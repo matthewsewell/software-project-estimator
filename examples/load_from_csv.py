@@ -8,16 +8,20 @@ import os
 from software_project_estimator import Project, Task
 from software_project_estimator.simulation.monte_carlo import MonteCarlo
 
+
 def main():
+    """
+    Load a CSV file of tasks into a project and run a monte carlo simulation.
+    """
     file_directory = os.path.dirname(os.path.realpath(__file__))
     csv_file = os.path.join(file_directory, "assets", "fake-project.csv")
-    with open(csv_file) as csvfile:
+    with open(csv_file, encoding="utf-8") as csvfile:
         reader = csv.DictReader(csvfile)
         tasks = []
         for row in reader:
-            row['optimistic'] = float(row['optimistic'])
-            row['pessimistic'] = float(row['pessimistic'])
-            row['likely'] = float(row['likely'])
+            row["optimistic"] = float(row["optimistic"])
+            row["pessimistic"] = float(row["pessimistic"])
+            row["likely"] = float(row["likely"])
             tasks.append(Task(**row))
     project = Project(
         name="This is an example project",

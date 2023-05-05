@@ -41,9 +41,13 @@ class MonteCarlo(Observable):  # pylint: disable=too-few-public-methods
         Run the monte carlo simulation using multiprocessing. Return a
         dictionary of the results.
         """
+<<<<<<< HEAD
 
         start_time = datetime.now()
         self.notify_observers(Event(tag="monte_carlo_start", data={}))
+=======
+        print("Running monte carlo simulation")
+>>>>>>> main
         if self.project and self.project.max_person_days_per_week <= 0:
             # We'll send an event to the observers and raise an error here.
             # that way the observers can do something with the error even
@@ -58,7 +62,7 @@ class MonteCarlo(Observable):  # pylint: disable=too-few-public-methods
 
         with multiprocessing.Pool() as pool:
             results = []
-            for i, result in enumerate(
+            for _, result in enumerate(
                 pool.imap_unordered(self._run_iteration, range(self.iterations))
             ):
                 results.append(result)
