@@ -27,7 +27,7 @@ from software_project_estimator.simulation.states import (  # isort: skip
 )
 
 
-class MyObserver(Observer):
+class MyObserver(Observer):  # pylint: disable=too-few-public-methods
     """Observer class used for testing."""
 
     def __init__(self):

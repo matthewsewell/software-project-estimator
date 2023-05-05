@@ -2,13 +2,14 @@
 
 
 import multiprocessing
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 from software_project_estimator import Project
 from software_project_estimator.event import Event
-from software_project_estimator.observer import Observable, Observer
+from software_project_estimator.observer import Observable
 from software_project_estimator.simulation.models import IterationResultStatus
 
 from software_project_estimator.simulation.iteration import (  # isort: skip
@@ -41,6 +42,7 @@ class MonteCarlo(Observable):  # pylint: disable=too-few-public-methods
         dictionary of the results.
         """
 
+        start_time = datetime.now()
         self.notify_observers(Event(tag="monte_carlo_start", data={}))
         if self.project and self.project.max_person_days_per_week <= 0:
             # We'll send an event to the observers and raise an error here.
@@ -66,8 +68,12 @@ class MonteCarlo(Observable):  # pylint: disable=too-few-public-methods
                         data={"number": i, "result": result},
                     )
                 )
+        end_time = datetime.now()
         self.notify_observers(
-            Event(tag="monte_carlo_simulation_end", data={"seconds": 0})
+            Event(
+                tag="monte_carlo_simulation_end",
+                data={"seconds": (end_time - start_time).total_seconds()},
+            )
         )
         return self._process_results(results)
 
@@ -83,6 +89,7 @@ class MonteCarlo(Observable):  # pylint: disable=too-few-public-methods
         aggregating the data.
         """
         self.notify_observers(Event(tag="monte_carlo_processing_start", data={}))
+        start_time = datetime.now()
         data: dict = {}
         for result in results:
             if result and result.status == IterationResultStatus.SUCCESS:
@@ -94,8 +101,14 @@ class MonteCarlo(Observable):  # pylint: disable=too-few-public-methods
                 self.notify_observers(
                     Event(tag="monte_carlo_result_prcessed", data={"result": result})
                 )
-        self.notify_observers(Event(tag="monte_carlo_processing_end", data={}))
+        self.notify_observers(
+            Event(
+                tag="monte_carlo_processing_end",
+                data={"seconds": (datetime.now() - start_time).total_seconds()},
+            )
+        )
 
+        start_time = datetime.now()
         self.notify_observers(Event(tag="monte_carlo_outcomes_start", data={}))
         outcomes: dict = {}
         cumulative_count = 0
@@ -111,7 +124,10 @@ class MonteCarlo(Observable):  # pylint: disable=too-few-public-methods
                 )
             )
         self.notify_observers(
-            Event(tag="monte_carlo_outcomes_end", data={"seconds": 0})
+            Event(
+                tag="monte_carlo_outcomes_end",
+                data={"seconds": (datetime.now() - start_time).total_seconds()},
+            )
         )
 
         return outcomes

@@ -1,9 +1,10 @@
-from abc import ABC, abstractmethod
+"""Abstract Base Classes for the Observer Pattern"""
 
+from abc import ABC, abstractmethod
 from software_project_estimator.event import Event
 
 
-class Observer(ABC):
+class Observer(ABC):  # pylint: disable=too-few-public-methods
     """
     Observer class used to observe an observable object
     """
