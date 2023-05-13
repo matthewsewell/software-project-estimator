@@ -1,7 +1,4 @@
 """Unit tests for the Task class."""
-import sys
-sys.path.append('../src')
-
 
 import unittest
 
