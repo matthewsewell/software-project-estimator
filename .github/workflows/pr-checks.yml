@@ -23,7 +23,7 @@ jobs:
         python -m pip install -r requirements.txt
     - name: Testing the code with unittest
       run: |
-        python -m unittest discover src
+        python -m unittest
     - name: Linting with Pylint, Black, Isort and Mypy
       run: |
         pylint src
