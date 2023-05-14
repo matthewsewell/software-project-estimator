@@ -12,7 +12,7 @@ pip install python-software-project-estimator
 ```
 
  ## Usage
- Here's an extremely trivial example.
+ Here's an extremely trivial example. For something less trivial, see [the csv example](examples/load_from_csv.py)
  ```
 from datetime import date
 
